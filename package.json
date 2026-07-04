@@ -1,0 +1,27 @@
+{
+  "name": "personachat",
+  "version": "2.0.0",
+  "private": true,
+  "description": "AI 人格聊天 — AI-Native 重构版",
+  "type": "module",
+  "scripts": {
+    "dev:api": "pnpm --filter @personachat/api dev",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "pnpm -r lint",
+    "check": "node scripts/check-rules.mjs",
+    "check:spec-binding": "node scripts/check-spec-binding.mjs",
+    "trinity": "pnpm typecheck && node scripts/check-rules.mjs && pnpm test",
+    "snapshot": "node scripts/gen-context-snapshot.mjs",
+    "delta": "node scripts/gen-round-delta.mjs",
+    "retro": "node scripts/gen-retro-index.mjs",
+    "release": "node scripts/deploy.mjs",
+    "seed": "node scripts/seed.mjs"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0",
+    "vitest": "^1.6.0",
+    "zod": "^3.23.0"
+  }
+}

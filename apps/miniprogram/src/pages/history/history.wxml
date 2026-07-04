@@ -1,0 +1,35 @@
+<!-- 历史记录页面 -->
+<view class="container">
+  <view class="section-title">对话历史</view>
+
+  <!-- 按人格分组的对话列表 -->
+  <view class="chat-group" wx:for="{{chatGroups}}" wx:key="personaId">
+    <view class="group-header" bindtap="onGroupTap" data-id="{{item.personaId}}">
+      <view class="group-avatar">{{item.personaName[0]}}</view>
+      <view class="group-info">
+        <view class="group-name">{{item.personaName}}</view>
+        <view class="group-count">{{item.count}} 条对话</view>
+      </view>
+      <view class="group-arrow">›</view>
+    </view>
+
+    <!-- 展开的对话列表 -->
+    <view class="chat-list" wx:if="{{expandedGroup === item.personaId}}">
+      <view
+        class="chat-item"
+        wx:for="{{item.chats}}"
+        wx:for-item="chat"
+        wx:key="id"
+        bindtap="onChatTap"
+        data-persona="{{item.personaId}}"
+      >
+        <view class="chat-preview">{{chat.reply.slice(0, 50)}}...</view>
+        <view class="chat-time">{{chat.createdAtFormatted}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="empty" wx:if="{{chatGroups.length === 0}}">
+    暂无对话记录
+  </view>
+</view>

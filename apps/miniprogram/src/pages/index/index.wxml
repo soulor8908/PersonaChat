@@ -1,0 +1,56 @@
+<!-- 人格库首页 -->
+<view class="container">
+  <!-- 搜索栏 -->
+  <view class="search-bar">
+    <input
+      class="search-input"
+      placeholder="搜索人格..."
+      value="{{searchText}}"
+      bindinput="onSearchInput"
+    />
+  </view>
+
+  <!-- 分类标签 -->
+  <scroll-view class="category-scroll" scroll-x>
+    <view
+      class="category-tag {{activeCategory === item.key ? 'active' : ''}}"
+      wx:for="{{categories}}"
+      wx:key="key"
+      bindtap="onCategoryTap"
+      data-key="{{item.key}}"
+    >
+      {{item.label}}
+    </view>
+  </scroll-view>
+
+  <!-- 人格列表 -->
+  <view class="persona-list">
+    <view
+      class="persona-card"
+      wx:for="{{personas}}"
+      wx:key="id"
+      bindtap="onPersonaTap"
+      data-id="{{item.id}}"
+    >
+      <view class="persona-avatar">{{item.name[0]}}</view>
+      <view class="persona-info">
+        <view class="persona-name">{{item.name}}</view>
+        <view class="persona-desc">{{item.description}}</view>
+        <view class="persona-meta">
+          <text class="persona-category">{{item.categoryLabel}}</text>
+          <text class="persona-stars" wx:if="{{item.stargazers_count > 0}}">
+            ⭐ {{item.stargazers_count}}
+          </text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty" wx:if="{{personas.length === 0 && !loading}}">
+    暂无数据
+  </view>
+
+  <!-- 加载中 -->
+  <view class="loading" wx:if="{{loading}}">加载中...</view>
+</view>

@@ -1,0 +1,16 @@
+name = "persona-chat-api"
+main = "src/server.ts"
+compatibility_date = "2024-01-01"
+
+[env.production]
+name = "persona-chat-api"
+
+# D1 Database
+[[d1_databases]]
+binding = "DB"
+database_name = "persona-chat-db"
+database_id = "fc79067a-1948-41ef-903b-5a39ee997696"  # 部署时创建
+
+# 环境变量
+[vars]
+ENVIRONMENT = "development"

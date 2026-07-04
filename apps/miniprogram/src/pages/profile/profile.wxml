@@ -1,0 +1,72 @@
+<!-- 个人设置页面 -->
+<view class="container">
+  <view class="section-title">设置</view>
+
+  <!-- 模型配置 -->
+  <view class="section">
+    <view class="section-header">🤖 模型配置</view>
+
+    <!-- 内置免费模型 -->
+    <view class="model-item" wx:for="{{builtinModels}}" wx:key="id">
+      <view class="model-info">
+        <view class="model-name">{{item.name}}</view>
+        <view class="model-badge free" wx:if="{{item.free}}">免费</view>
+        <view class="model-badge paid" wx:else>付费</view>
+      </view>
+      <view class="model-status">✅ 已配置</view>
+    </view>
+
+    <!-- 用户自定义模型 -->
+    <view class="model-item" wx:for="{{customModels}}" wx:key="id">
+      <view class="model-info">
+        <view class="model-name">{{item.modelName}}</view>
+        <view class="model-badge custom">自定义</view>
+      </view>
+      <view class="model-actions">
+        <view class="action-btn delete" bindtap="onDeleteModel" data-id="{{item.id}}">删除</view>
+      </view>
+    </view>
+
+    <!-- 添加模型按钮 -->
+    <view class="add-model-btn" bindtap="onAddModelTap">
+      + 添加自定义模型
+    </view>
+  </view>
+
+  <!-- 关于 -->
+  <view class="section">
+    <view class="section-header">ℹ️ 关于</view>
+    <view class="about-text">
+      PersonaChat v0.1.0
+      基于 GitHub 开源蒸馏人格，让你可以与不同的人格对话。
+    </view>
+  </view>
+</view>
+
+<!-- 添加模型弹窗 -->
+<view class="modal" wx:if="{{showAddModal}}">
+  <view class="modal-mask" bindtap="onCloseModal"></view>
+  <view class="modal-content">
+    <view class="modal-title">添加自定义模型</view>
+
+    <view class="form-item">
+      <text class="form-label">模型名称</text>
+      <input class="form-input" placeholder="如：My-GPT" value="{{newModel.name}}" bindinput="onFormInput" data-field="name" />
+    </view>
+
+    <view class="form-item">
+      <text class="form-label">API Base URL</text>
+      <input class="form-input" placeholder="https://api.example.com/v1" value="{{newModel.baseUrl}}" bindinput="onFormInput" data-field="baseUrl" />
+    </view>
+
+    <view class="form-item">
+      <text class="form-label">API Key</text>
+      <input class="form-input" placeholder="sk-..." value="{{newModel.apiKey}}" bindinput="onFormInput" data-field="apiKey" password />
+    </view>
+
+    <view class="modal-actions">
+      <view class="modal-btn cancel" bindtap="onCloseModal">取消</view>
+      <view class="modal-btn confirm" bindtap="onSaveModel">保存</view>
+    </view>
+  </view>
+</view>

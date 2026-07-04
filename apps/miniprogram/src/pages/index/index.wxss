@@ -1,0 +1,109 @@
+.container {
+  padding: 20rpx;
+  background: #f5f5f5;
+  min-height: 100vh;
+}
+
+.search-bar {
+  margin-bottom: 20rpx;
+}
+
+.search-input {
+  background: #fff;
+  border-radius: 40rpx;
+  padding: 16rpx 30rpx;
+  font-size: 28rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0,0,0,0.05);
+}
+
+.category-scroll {
+  white-space: nowrap;
+  margin-bottom: 20rpx;
+}
+
+.category-tag {
+  display: inline-block;
+  padding: 12rpx 30rpx;
+  margin-right: 16rpx;
+  border-radius: 30rpx;
+  background: #fff;
+  font-size: 26rpx;
+  color: #666;
+}
+
+.category-tag.active {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff;
+}
+
+.persona-card {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0,0,0,0.06);
+}
+
+.persona-avatar {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40rpx;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.persona-info {
+  margin-left: 24rpx;
+  flex: 1;
+  overflow: hidden;
+}
+
+.persona-name {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8rpx;
+}
+
+.persona-desc {
+  font-size: 24rpx;
+  color: #999;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-bottom: 8rpx;
+}
+
+.persona-meta {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.persona-category {
+  font-size: 22rpx;
+  color: #667eea;
+  background: #f0f0ff;
+  padding: 4rpx 16rpx;
+  border-radius: 20rpx;
+}
+
+.persona-stars {
+  font-size: 22rpx;
+  color: #999;
+}
+
+.empty, .loading {
+  text-align: center;
+  padding: 100rpx 0;
+  color: #999;
+  font-size: 28rpx;
+}

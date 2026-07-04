@@ -1,0 +1,94 @@
+.container {
+  padding: 20rpx;
+  background: #f5f5f5;
+  min-height: 100vh;
+}
+
+.section-title {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 30rpx;
+}
+
+.group-header {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  padding: 24rpx;
+  border-radius: 16rpx;
+  margin-bottom: 16rpx;
+}
+
+.group-avatar {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32rpx;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.group-info {
+  flex: 1;
+  margin-left: 20rpx;
+}
+
+.group-name {
+  font-size: 30rpx;
+  font-weight: 500;
+  color: #333;
+}
+
+.group-count {
+  font-size: 24rpx;
+  color: #999;
+  margin-top: 4rpx;
+}
+
+.group-arrow {
+  font-size: 40rpx;
+  color: #ccc;
+}
+
+.chat-list {
+  background: #fff;
+  border-radius: 0 0 16rpx 16rpx;
+  margin-top: -16rpx;
+  padding: 16rpx 24rpx;
+}
+
+.chat-item {
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.chat-item:last-child {
+  border-bottom: none;
+}
+
+.chat-preview {
+  font-size: 26rpx;
+  color: #666;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chat-time {
+  font-size: 22rpx;
+  color: #999;
+  margin-top: 8rpx;
+}
+
+.empty {
+  text-align: center;
+  padding: 100rpx 0;
+  color: #999;
+  font-size: 28rpx;
+}

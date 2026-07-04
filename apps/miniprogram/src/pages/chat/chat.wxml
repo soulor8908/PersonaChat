@@ -1,0 +1,59 @@
+<!-- 聊天页面 -->
+<view class="chat-container">
+  <!-- 顶部人格信息 -->
+  <view class="chat-header">
+    <view class="header-avatar">{{persona.name[0]}}</view>
+    <view class="header-info">
+      <view class="header-name">{{persona.name}}</view>
+      <view class="header-desc">{{persona.description}}</view>
+    </view>
+    <view class="header-actions">
+      <picker mode="selector" range="{{modelNames}}" bindchange="onModelChange">
+        <view class="model-btn">🤖 {{currentModelName}}</view>
+      </picker>
+    </view>
+  </view>
+
+  <!-- 消息列表 -->
+  <scroll-view
+    class="message-list"
+    scroll-y
+    scroll-into-view="{{scrollToView}}"
+    scroll-with-animation
+  >
+    <view
+      class="message {{item.role === 'user' ? 'message-user' : 'message-ai'}}"
+      wx:for="{{messages}}"
+      wx:key="id"
+      id="msg-{{item.id}}"
+    >
+      <view class="msg-avatar" wx:if="{{item.role === 'assistant'}}">{{persona.name[0]}}</view>
+      <view class="msg-content">
+        <text>{{item.content}}</text>
+      </view>
+      <view class="msg-avatar" wx:if="{{item.role === 'user'}}">我</view>
+    </view>
+
+    <!-- AI 正在输入 -->
+    <view class="message message-ai" wx:if="{{loading}}">
+      <view class="msg-avatar">{{persona.name[0]}}</view>
+      <view class="msg-content typing">
+        <text>...</text>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- 输入栏 -->
+  <view class="input-bar">
+    <view class="upload-btn" bindtap="onUploadTap">📎</view>
+    <input
+      class="input-field"
+      placeholder="输入消息..."
+      value="{{inputText}}"
+      bindinput="onInput"
+      bindconfirm="onSend"
+      confirm-type="send"
+    />
+    <view class="send-btn {{inputText ? 'active' : ''}}" bindtap="onSend">发送</view>
+  </view>
+</view>
