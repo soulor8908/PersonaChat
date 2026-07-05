@@ -51,19 +51,46 @@ Step 6: 如果无 Spec → 拒绝编码，先 spawn BA subagent 写 PRD
 
 详细提示词 → `docs/workflow/spec-first-workflow.md` 第二节。
 
-## 七门禁速查
+## 门禁速查
 
-| 门禁 | 检查项 | Fail 怎么办 |
-|------|--------|------------|
-| G1 | PRD 有完整 AC（正常/边界/错误） | 驳回 BA |
-| G3 | Tech-Spec 有 Dx 决策 | 驳回 Tech Lead |
-| G3.5 | Spec↔Code Dx 双向绑定 | 补齐注解或 Spec |
-| G4 | 测试覆盖全部 Given/When/Then | 驳回 test-writer |
-| G5 | `pnpm trinity` 全绿 | 驳回 impl-writer |
-| G6 | check-rules.mjs 阻断项全过 | 驳回 impl-writer |
-| G7 | Reviewer 逐方法核对通过 | 驳回并标注需改 |
-| G8 | UI 渲染测试 — `apps/web/src/test/` 中每个页面有冒烟测试 | 缺测试驳回 impl-writer |
-| G9 | Tailwind CSS 无矛盾 class — ESLint `no-contradicting-classname` 无 error | 有 error 驳回 impl-writer |
+> **重要变更**：AI-001 / AI-002 / AI-003 / AI-007 已从 `[advisory]` 升级为 **machine-enforced**。`pnpm trinity` 会自动阻断"跳过 Spec 直接写码"等流程违规，不再依赖 agent 自觉。
+
+| 门禁 | 检查项 | 校验方式 | Fail 怎么办 |
+|------|--------|----------|------------|
+| G0 | **流程合规 — Spec-First (AI-001)** | 改动功能源码时 `docs/prd/` + `docs/spec/*.tech.md` 必须同步改动；重构需附 `docs/spec/backrefactor-*.md` | 驳回：先补 PRD/Tech-Spec 再写码 |
+| G0 | **流程合规 — 测试先行 (AI-002)** | 改动功能源码时 `.test.ts` / `.e2e.test.ts` 必须同步改动 | 驳回：先写失败测试再实现 |
+| G0 | **流程合规 — 越界检测 (AI-003)** | 改动源码文件 basename 必须出现在 Tech-Spec "## 变更清单" 表格中 | 驳回：补声明或回退越界改动 |
+| G0 | **流程合规 — E2E 验收 (AI-007)** | 改动 `docs/prd/*.md` 时必须有测试文件同步改动 | 驳回：补 E2E 测试覆盖新 AC |
+| G1 | PRD 有完整 AC（正常/边界/错误） | Reviewer 核对 | 驳回 BA |
+| G3 | Tech-Spec 有 Dx 决策 + 变更清单表格 | Reviewer 核对（G0 越界检测依赖此表格） | 驳回 Tech Lead |
+| G3.5 | Spec↔Code Dx 双向绑定 | `check-spec-binding.mjs` | 补齐注解或 Spec |
+| G4 | 测试覆盖全部 Given/When/Then | Reviewer 核对 + vitest | 驳回 test-writer |
+| G5 | `pnpm trinity` 全绿 | CI | 驳回 impl-writer |
+| G6 | check-rules.mjs 阻断项全过（22 项 enforcement） | CI | 驳回 impl-writer |
+| G7 | Reviewer 逐方法核对通过 | Reviewer | 驳回并标注需改 |
+| G8 | UI 渲染测试 — `apps/web/src/test/` 中每个页面有冒烟测试 | CI (FRONTEND-001) | 缺测试驳回 impl-writer |
+| G9 | Tailwind CSS 无矛盾 class — ESLint `no-contradicting-classname` 无 error | CI | 有 error 驳回 impl-writer |
+
+### 流程门禁触发条件（G0）
+
+`check-rules.mjs` 通过 `git diff` 检测本次改动文件。三种触发模式：
+
+1. **CI 场景**：`BASE_REF=origin/main node scripts/check-rules.mjs` — 比较 PR base ref 与 HEAD
+2. **本地场景**：`node scripts/check-rules.mjs` — 比较工作树 vs HEAD（含未追踪文件）
+3. **干净工作树**：所有 G0 门禁 advisory skip（不阻断）
+
+"功能源码"覆盖范围（改动这些文件会触发 G0）：
+
+- `apps/api/src/{domain,repository,service,router}/**/*.ts`（排除 `.test.ts`）
+- `packages/contracts/src/schemas/**/*.ts`
+- `apps/web/src/pages/**/*.tsx`
+- `apps/miniprogram/pages/**/*.{js,ts}`（排除 wxml/wxss/json）
+
+不在以上范围的文件（脚本、配置、文档本身、test 文件）改动不触发 G0。
+
+### 重构场景例外
+
+纯重构（无功能变更）需在 PR 中加入 `docs/spec/backrefactor-<feature>.md`，G0 会自动放行 Spec-First 和测试先行检查。仍要求 trinity 全绿。
 
 ## 每次改动必跑
 

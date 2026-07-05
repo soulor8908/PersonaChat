@@ -6,6 +6,7 @@
 import { readdirSync, readFileSync, existsSync } from 'node:fs'
 import { join, dirname, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { execSync } from 'node:child_process'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const ROOT = join(__dirname, '..')
@@ -13,6 +14,69 @@ const RULES_DIR = join(ROOT, '.trae', 'rules')
 const SCRIPT_FILE = join(__dirname, 'check-rules.mjs')
 
 const CHECKS = []
+
+// ═══════════════════════════════════════════════
+// Git 改动检测辅助 — 流程类门禁 (AI-001/002/003/007) 依赖
+// ═══════════════════════════════════════════════
+// 优先使用 BASE_REF 环境变量（CI 场景: PR vs base branch）
+// 否则使用工作树相对 HEAD 的改动（本地场景: unstaged+staged vs HEAD）
+// 工作树干净且无 BASE_REF → 返回 null，门禁 advisory skip
+// 注: maxBuffer 设为 10MB 防止 pnpm-store 等大目录撑爆默认 1MB buffer
+const GIT_EXEC_OPTS = { cwd: ROOT, encoding: 'utf-8', maxBuffer: 10 * 1024 * 1024 }
+
+function getChangedFiles() {
+  const baseRef = process.env.BASE_REF
+  if (baseRef) {
+    try {
+      const out = execSync(`git diff --name-only ${baseRef}...HEAD`, GIT_EXEC_OPTS)
+      return out.split('\n').map(s => s.trim()).filter(Boolean)
+    } catch (e) {
+      return null
+    }
+  }
+  try {
+    // 同时获取已暂存和未暂存（vs HEAD）的改动
+    const out = execSync('git diff --name-only HEAD', GIT_EXEC_OPTS)
+    const staged = execSync('git diff --name-only --cached', GIT_EXEC_OPTS)
+    // 包含未追踪的新文件
+    let untracked = ''
+    try {
+      untracked = execSync('git ls-files --others --exclude-standard', GIT_EXEC_OPTS)
+    } catch (_) { /* ignore */ }
+    const all = new Set([...out.split('\n'), ...staged.split('\n'), ...untracked.split('\n')].map(s => s.trim()).filter(Boolean))
+    return [...all]
+  } catch (e) {
+    return null
+  }
+}
+
+// 判定文件是否为"功能承载"源码 — 这些文件改动需要 Spec 跟进
+const FEATURE_SOURCE_PATTERNS = [
+  /^apps\/api\/src\/(domain|repository|service|router)\/.*\.ts$/,
+  /^packages\/contracts\/src\/schemas\/.*\.ts$/,
+  /^apps\/web\/src\/pages\/.*\.tsx$/,
+  /^apps\/miniprogram\/pages\/.*\/(?!.*\.(wxml|wxss|json)$).*\.(js|ts)$/,
+]
+
+const TEST_FILE_PATTERN = /\.(test|spec|e2e\.test)\.(ts|tsx|js)$/
+const REFACTOR_SPEC_PATTERN = /^docs\/spec\/backrefactor-.*\.md$/
+
+function isFeatureSource(file) {
+  if (TEST_FILE_PATTERN.test(file)) return false
+  return FEATURE_SOURCE_PATTERNS.some(p => p.test(file))
+}
+
+function isTestFile(file) {
+  return TEST_FILE_PATTERN.test(file)
+}
+
+function isPrdFile(file) {
+  return /^docs\/prd\/.*\.md$/.test(file)
+}
+
+function isTechSpecFile(file) {
+  return /^docs\/spec\/.*\.tech\.md$/.test(file) || REFACTOR_SPEC_PATTERN.test(file)
+}
 
 // ═══════════════════════════════════════════════
 // ARCH-002: 契约层纯净 — contracts 只能依赖 zod/typescript/vitest
@@ -748,6 +812,187 @@ CHECKS.push(async () => {
   }
 
   return { rule: 'FRONTEND-002', ok: true, msg: 'vitest.config.ts 正确配置了 jsdom 环境' }
+})
+
+// ═══════════════════════════════════════════════
+// AI-001: Spec-First 门禁 — 改动功能源码必须同步 PRD/Tech-Spec
+// ═══════════════════════════════════════════════
+CHECKS.push(async () => {
+  const changed = getChangedFiles()
+  if (!changed || changed.length === 0) {
+    return { rule: 'AI-001', ok: true, msg: '[advisory] 工作树干净或 git 不可用，跳过 Spec-First 检查' }
+  }
+
+  const featureSources = changed.filter(isFeatureSource)
+  if (featureSources.length === 0) {
+    return { rule: 'AI-001', ok: true, msg: '[advisory] 无功能源码改动，跳过 Spec 检查' }
+  }
+
+  const prdChanged = changed.filter(isPrdFile)
+  const specChanged = changed.filter(isTechSpecFile)
+  const refactorSpec = specChanged.find(f => REFACTOR_SPEC_PATTERN.test(f))
+
+  if (refactorSpec) {
+    return { rule: 'AI-001', ok: true, msg: `[advisory] 检测到回溯 Spec (${relative(ROOT, join(ROOT, refactorSpec))})，允许重构场景` }
+  }
+
+  if (prdChanged.length === 0 && specChanged.length === 0) {
+    return {
+      rule: 'AI-001',
+      ok: false,
+      msg: `Spec-First 违规: 改动了 ${featureSources.length} 个功能源码文件但未同步修改 docs/prd/ 或 docs/spec/*.tech.md。\n  源码改动:\n${featureSources.slice(0, 5).map(f => `    ${f}`).join('\n')}${featureSources.length > 5 ? `\n    ... 及另外 ${featureSources.length - 5} 个` : ''}\n  修复: 先写/更新 PRD + Tech-Spec 再改源码；若是重构，创建 docs/spec/backrefactor-<feature>.md`,
+    }
+  }
+
+  return {
+    rule: 'AI-001',
+    ok: true,
+    msg: `Spec-First 合规: ${featureSources.length} 个源码改动 + ${prdChanged.length} PRD + ${specChanged.length} Tech-Spec`,
+  }
+})
+
+// ═══════════════════════════════════════════════
+// AI-002: 测试先行门禁 — 改动功能源码必须同步测试
+// ═══════════════════════════════════════════════
+CHECKS.push(async () => {
+  const changed = getChangedFiles()
+  if (!changed || changed.length === 0) {
+    return { rule: 'AI-002', ok: true, msg: '[advisory] 工作树干净或 git 不可用，跳过测试先行检查' }
+  }
+
+  const featureSources = changed.filter(isFeatureSource)
+  if (featureSources.length === 0) {
+    return { rule: 'AI-002', ok: true, msg: '[advisory] 无功能源码改动，跳过测试先行检查' }
+  }
+
+  const testFiles = changed.filter(isTestFile)
+  const refactorSpec = changed.find(f => REFACTOR_SPEC_PATTERN.test(f))
+
+  if (refactorSpec && testFiles.length === 0) {
+    return { rule: 'AI-002', ok: true, msg: `[advisory] 重构场景 (${relative(ROOT, join(ROOT, refactorSpec))})，跳过测试先行检查` }
+  }
+
+  if (testFiles.length === 0) {
+    return {
+      rule: 'AI-002',
+      ok: false,
+      msg: `测试先行违规: 改动了 ${featureSources.length} 个功能源码文件但无 .test.ts/.e2e.test.ts 同步改动。\n  源码改动:\n${featureSources.slice(0, 5).map(f => `    ${f}`).join('\n')}\n  修复: 先写失败测试 (红) 再写实现 (绿)`,
+    }
+  }
+
+  return {
+    rule: 'AI-002',
+    ok: true,
+    msg: `测试先行合规: ${featureSources.length} 个源码改动 + ${testFiles.length} 个测试文件`,
+  }
+})
+
+// ═══════════════════════════════════════════════
+// AI-003: 越界检测 — 改动的源码必须在 Tech-Spec 变更清单中声明
+// ═══════════════════════════════════════════════
+CHECKS.push(async () => {
+  const changed = getChangedFiles()
+  if (!changed || changed.length === 0) {
+    return { rule: 'AI-003', ok: true, msg: '[advisory] 工作树干净或 git 不可用，跳过越界检查' }
+  }
+
+  const featureSources = changed.filter(isFeatureSource)
+  if (featureSources.length === 0) {
+    return { rule: 'AI-003', ok: true, msg: '[advisory] 无功能源码改动，跳过越界检查' }
+  }
+
+  const specFiles = changed.filter(isTechSpecFile)
+  if (specFiles.length === 0) {
+    // AI-001 已经阻断此场景，这里 advisory 提示
+    return { rule: 'AI-003', ok: true, msg: '[advisory] 无 Tech-Spec 改动（AI-001 已阻断此场景）' }
+  }
+
+  // 收集所有变更 Tech-Spec 中声明的文件清单（从 markdown 表格 | 文件 | 提取）
+  const declaredFiles = new Set()
+  for (const specFile of specFiles) {
+    const fullPath = join(ROOT, specFile)
+    if (!existsSync(fullPath)) continue
+    const content = readFileSync(fullPath, 'utf-8')
+    // 匹配 markdown 表格行: | `path/file.ts` | ... | 或 | path/file.ts | ... |
+    const tableRows = content.matchAll(/^\|\s*`?([^|\n`]+?)`?\s*\|/gm)
+    for (const m of tableRows) {
+      let path = m[1].trim()
+      // 跳过表头、分隔行、决策编号
+      if (path.startsWith('--') || path.startsWith('文件') || path.startsWith('测试类型') || path.startsWith('错误码') || /^(D\d+|D#)/.test(path)) continue
+      // 移除可能的描述后缀
+      path = path.replace(/\s+.*$/, '').trim()
+      if (path.includes('/') || path.endsWith('.ts') || path.endsWith('.tsx') || path.endsWith('.js')) {
+        declaredFiles.add(path)
+      }
+    }
+  }
+
+  if (declaredFiles.size === 0) {
+    return { rule: 'AI-003', ok: true, msg: '[advisory] Tech-Spec 未含变更清单表格，无法核对越界（建议 Spec 增加 "## 变更清单" 段）' }
+  }
+
+  const outOfScope = featureSources.filter(f => {
+    // 模糊匹配: 文件名 basename 出现在某个声明路径中
+    const baseName = f.split('/').pop()
+    return ![...declaredFiles].some(declared =>
+      declared.endsWith(baseName) || declared === f || f.endsWith(declared)
+    )
+  })
+
+  if (outOfScope.length > 0) {
+    return {
+      rule: 'AI-003',
+      ok: false,
+      msg: `越界改动: ${outOfScope.length} 个源码文件未在 Tech-Spec 变更清单中声明:\n${outOfScope.slice(0, 5).map(f => `    ${f}`).join('\n')}\n  已声明文件: ${[...declaredFiles].slice(0, 5).join(', ')}${declaredFiles.size > 5 ? ' ...' : ''}\n  修复: 在 Tech-Spec 的 "## 变更清单" 表格中补声明，或回退越界改动`,
+    }
+  }
+
+  return {
+    rule: 'AI-003',
+    ok: true,
+    msg: `越界检查合规: ${featureSources.length} 个源码改动全部在 Tech-Spec 变更清单内`,
+  }
+})
+
+// ═══════════════════════════════════════════════
+// AI-007: E2E 验收门禁 — PRD 改动必须伴随测试改动
+// ═══════════════════════════════════════════════
+CHECKS.push(async () => {
+  const changed = getChangedFiles()
+  if (!changed || changed.length === 0) {
+    return { rule: 'AI-007', ok: true, msg: '[advisory] 工作树干净或 git 不可用，跳过 E2E 验收检查' }
+  }
+
+  const prdFiles = changed.filter(isPrdFile)
+  if (prdFiles.length === 0) {
+    return { rule: 'AI-007', ok: true, msg: '[advisory] 无 PRD 改动，跳过 E2E 验收检查' }
+  }
+
+  const testFiles = changed.filter(isTestFile)
+  if (testFiles.length === 0) {
+    return {
+      rule: 'AI-007',
+      ok: false,
+      msg: `E2E 验收违规: 改动了 ${prdFiles.length} 个 PRD 文件但无测试文件同步改动。\n  PRD 改动:\n${prdFiles.map(f => `    ${f}`).join('\n')}\n  修复: PRD 中每条 Given/When/Then 必须有对应测试断言；新增 AC 必须同步新增测试用例`,
+    }
+  }
+
+  // 进一步: 统计 PRD 中 Given 行数 vs 测试文件中 test( 行数变化
+  let prdGivenCount = 0
+  for (const prdFile of prdFiles) {
+    const fullPath = join(ROOT, prdFile)
+    if (!existsSync(fullPath)) continue
+    const content = readFileSync(fullPath, 'utf-8')
+    // 匹配 "Given " 开头（case insensitive）作为 AC 计数粗粒度估计
+    const matches = content.match(/^[\s-]*Given\s/gim)
+    if (matches) prdGivenCount += matches.length
+  }
+
+  return {
+    rule: 'AI-007',
+    ok: true,
+    msg: `E2E 验收合规: ${prdFiles.length} PRD + ${testFiles.length} 测试文件（PRD 含 ~${prdGivenCount} 个 Given 子句，需 Reviewer 逐条核对 AC 覆盖）`,
+  }
 })
 
 // ── 辅助函数 ──

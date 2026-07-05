@@ -150,14 +150,23 @@ Tech-Spec 模板包含:
 
 ## 三、门禁定义
 
+> **G0 流程门禁** (NEW) — `pnpm trinity` 自动阻断流程违规，不依赖 agent 自觉：
+> - **AI-001** Spec-First: 改动功能源码 → PRD/Tech-Spec 必须同步改动（重构需附 backrefactor Spec）
+> - **AI-002** 测试先行: 改动功能源码 → `.test.ts` / `.e2e.test.ts` 必须同步改动
+> - **AI-003** 越界检测: 改动源码 basename → 必须出现在 Tech-Spec "## 变更清单" 表格中
+> - **AI-007** E2E 验收: 改动 `docs/prd/*.md` → 必须有测试文件同步改动
+>
+> 触发条件见 AGENTS.md "G0 流程门禁触发条件"。CI 场景使用 `BASE_REF` 环境变量；本地场景使用 `git diff HEAD`；干净工作树 advisory skip。
+
 | 门禁 | 检查项 | 校验方式 |
 |------|--------|----------|
+| **G0** | **流程合规** (AI-001/002/003/007) — 阻断"跳过 Spec 直接写码"等违规 | check-rules.mjs (git diff) |
 | G1 | PRD 存在、AC 包含正常/边界/错误三类路径、BLOCKING Q&A 已填写 | Reviewer 逐项核对 |
-| G3 | Tech-Spec 存在、D1~Dn 决策完整（含理由+拒绝方案）、contracts 变更已定义 | Reviewer 逐项核对 |
+| G3 | Tech-Spec 存在、D1~Dn 决策完整（含理由+拒绝方案）、contracts 变更已定义、变更清单表格存在 | Reviewer 逐项核对 |
 | G3.5 | Spec-Sync: Spec 决策编号 Dx ↔ 代码注释 TECH-XXX-001 Dx 双向绑定 | check-spec-binding.mjs |
 | G4 | 测试文件存在、每条 Given/When/Then 有对应断言、覆盖率检查清单完整 | Reviewer 逐项核对 + vitest |
-| G5 | `pnpm trinity` 全绿 (typecheck + check-rules + test) | CI |
-| G6 | check-rules.mjs 全部阻断项通过 | CI |
+| G5 | `pnpm trinity` 全绿 (typecheck + check-rules + lint + test) | CI |
+| G6 | check-rules.mjs 全部阻断项通过（22 项 enforcement） | CI |
 | G6.1 | META-003 (声明即实现) + META-004 (实现即声明) 通过 | CI |
 | G6.5 | SEC-002 (无硬编码凭据) 通过 | CI |
 | G7 | 代码 review 通过（逐方法核对）+ AI-005 SSOT 派生确认 | Reviewer |

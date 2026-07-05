@@ -22,4 +22,5 @@ severity: blocking
 3. 理解 Spec 中的验收标准、边界条件和状态机后再开始实现
 
 ## 校验方式
-[advisory] 无直接脚本校验（需语义理解 Spec 内容）。Reviewer 逐方法核对实现是否偏离 Spec 定义。重构 PR 必须附带回溯 Spec。
+
+`check-rules.mjs` 分支 `AI-001` — Spec-First 门禁：通过 `git diff` 检测本次改动文件，若 `apps/api/src/{domain,repository,service,router}/`、`packages/contracts/src/schemas/`、`apps/web/src/pages/`、`apps/miniprogram/pages/` 下的功能源码发生改动但 `docs/prd/*.md` 和 `docs/spec/*.tech.md` 均未同步改动 → **error**（阻断）。重构例外：若同步改动了 `docs/spec/backrefactor-*.md`（回溯 Spec）则放行。CI 场景使用 `BASE_REF` 环境变量指定 PR base ref；本地场景使用 `git diff HEAD` + 未追踪文件。Reviewer 仍需逐方法核对实现是否偏离 Spec 定义。

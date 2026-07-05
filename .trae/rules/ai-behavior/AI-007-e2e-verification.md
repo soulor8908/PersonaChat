@@ -54,4 +54,4 @@ describe('POST /api/personas', () => {
 
 ## 校验方式
 
-`vitest` CI job 中运行时自动检查。Reviewer 逐条核对 PRD 验收标准与测试用例覆盖率（正常/边界/错误三类路径是否完整）。
+`check-rules.mjs` 分支 `AI-007` — E2E 验收门禁：通过 `git diff` 检测本次改动的 PRD 文件，若 `docs/prd/*.md` 发生改动但无 `.test.ts` / `.e2e.test.ts` 同步改动 → **error**（阻断）。同时统计 PRD 中 `Given` 子句数量作为粗粒度 AC 计数提示。Reviewer 仍需逐条核对 PRD 验收标准与测试用例覆盖率（正常/边界/错误三类路径是否完整）。`vitest` CI job 自动运行 E2E 测试。

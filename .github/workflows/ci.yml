@@ -17,6 +17,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # G0 门禁需要 base ref 历史以执行 git diff
 
       - uses: pnpm/action-setup@v4
         with:
@@ -35,7 +37,11 @@ jobs:
 
       - name: Rule check
         run: pnpm check
-        # check-rules.mjs — 16 项 enforcement，阻断项不通过则 CI 红
+        env:
+          # G0 流程门禁: PR 场景比较 base ref 与 HEAD，触发 AI-001/002/003/007
+          # push 事件不设 BASE_REF → 工作树 vs HEAD 比较（推到 main 后工作树干净 → advisory skip）
+          BASE_REF: ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || '' }}
+        # check-rules.mjs — 22 项 enforcement（含 G0 流程门禁），阻断项不通过则 CI 红
 
       - name: Lint
         run: pnpm lint

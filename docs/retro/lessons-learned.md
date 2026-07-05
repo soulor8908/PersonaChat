@@ -70,6 +70,9 @@
 | L19 | 工作流 | AGENTS.md 的"Step 0"必须是 Spec 存在性检查，不能假设前序流程已完成 | R7-10 | 新增 AI-008 |
 | L20 | 质量 | 代码和测试可通过 trinity 验证，但流程合规无人检查 — 需要自动化门禁 | R7-10 | check-rules 扩展 |
 | L21 | 测试 | **前端视觉质量零防御** — apps/web 有 16 个可视化/样式问题（无效 Tailwind class、硬编码颜色、padding 不统一等），全部零检测。根因：apps/web 无测试文件、无 jsdom 环境、无 eslint-plugin-tailwindcss、check-rules 全跳过前端代码。修复：三层方案 (a) 修复现有样式 (b) 添加 jsdom 组件冒烟测试 (c) ESLint tailwindcss 规则 + check-rules FRONTEND-001/002 强制执行 | R11 | FRONTEND-001/002, eslint-plugin-tailwindcss |
+| L22 | 工作流 | **AI-001/002/003/007 标 `[advisory]` 是结构性漏洞** — DeepSeek V4 Flash 等轻量模型完全忽视 advisory 规则。修复：4 条规则全部升级为 machine-enforced，通过 `git diff` 检测本次改动文件，强制 (a) 改源码必须同步改 PRD/Tech-Spec (b) 改源码必须同步改测试 (c) 改源码 basename 必须在 Tech-Spec 变更清单中 (d) 改 PRD 必须同步改测试。enforcement 项数 18→22。 | 流程加固 | check-rules.mjs AI-001/002/003/007 分支 |
+| L23 | 工程 | **`execSync` 默认 1MB maxBuffer 是隐藏陷阱** — 当 `.gitignore` 漏 `.pnpm-store/` 时，`git ls-files --others` 输出 1MB+ 触发异常被 try/catch 静默吞掉，导致 G0 门禁"假合规"。修复：(a) `.gitignore` 加 `.pnpm-store/` (b) `GIT_EXEC_OPTS.maxBuffer = 10MB`。教训：所有 `execSync` 调用必须显式设置 `maxBuffer`，且 catch 块不能完全静默。 | 流程加固 | scripts/check-rules.mjs GIT_EXEC_OPTS |
+| L24 | 工作流 | **CI 必须用 `BASE_REF` 触发 G0 流程门禁** — 仅靠本地 `git diff HEAD` 在干净工作树时会 advisory skip，无法拦截"提交时跳过 Spec"的违规。修复：CI workflow 在 PR 事件设置 `BASE_REF=origin/{base_ref}` + `fetch-depth: 0`。push 事件不设 BASE_REF（推到 main 后工作树即 HEAD，门禁 advisory skip 是预期行为）。 | 流程加固 | .github/workflows/ci.yml |
 
 ---
 

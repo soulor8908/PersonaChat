@@ -16,5 +16,5 @@ severity: blocking
 3. 写实现代码，逐个让测试通过
 
 ## 校验方式
-- `vitest run` 必须全部通过
-- 新增代码的测试覆盖率 >= 80%
+
+`check-rules.mjs` 分支 `AI-002` — 测试先行门禁：通过 `git diff` 检测本次改动文件，若功能源码（domain/repository/service/router/contracts schemas/web pages/miniprogram pages）发生改动但无 `.test.ts` / `.e2e.test.ts` / `.spec.ts` 文件同步改动 → **error**（阻断）。重构例外：若改动了 `docs/spec/backrefactor-*.md` 则放行（重构不要求新增测试）。配合 `vitest run` 必须全部通过 + 新增代码的测试覆盖率 >= 80%。
