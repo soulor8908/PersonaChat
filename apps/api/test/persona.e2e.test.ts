@@ -249,4 +249,23 @@ describe('Persona CRUD E2E', () => {
     const body = await res.json()
     expect(body.data.length).toBeGreaterThanOrEqual(2)
   })
+
+  it('GET /api/personas?category=educator filters by category', async () => {
+    await app.request('/api/personas', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: 'P1', category: 'thinker', systemPrompt: 't1' }),
+    })
+    await app.request('/api/personas', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: 'P2', category: 'educator', systemPrompt: 't2' }),
+    })
+
+    const res = await app.request('/api/personas?category=educator')
+    expect(res.status).toBe(200)
+    const body = await res.json()
+    expect(body.data.length).toBe(1)
+    expect(body.data[0].category).toBe('educator')
+  })
 })

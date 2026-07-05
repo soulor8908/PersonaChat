@@ -8,6 +8,7 @@ import { errorHandler } from './middleware/error-handler.js'
 import { authMiddleware } from './middleware/auth.js'
 import { chatRateLimiter, defaultRateLimiter } from './middleware/rate-limit.js'
 import { bodySizeLimit } from './middleware/body-limit.js'
+import { securityHeaders } from './middleware/security-headers.js'
 import { PersonaRepository } from './repository/persona-repo.js'
 import { ChatRepository } from './repository/chat-repo.js'
 import { PersonaService } from './service/persona-svc.js'
@@ -69,7 +70,8 @@ export function createApp(env: Env) {
   app.use('*', corsMiddleware)
   app.onError(errorHandler)
 
-  // 安全基础: 请求体大小限制
+  // 安全基础: 安全头 + 请求体大小限制
+  app.use('*', securityHeaders)
   app.use('*', bodySizeLimit)
 
   // 安全中间件: 写操作需要 auth，所有路由需要 rate limit

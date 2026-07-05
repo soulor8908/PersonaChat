@@ -161,6 +161,7 @@ Tech-Spec 模板包含:
 | G6.1 | META-003 (声明即实现) + META-004 (实现即声明) 通过 | CI |
 | G6.5 | SEC-002 (无硬编码凭据) 通过 | CI |
 | G7 | 代码 review 通过（逐方法核对）+ AI-005 SSOT 派生确认 | Reviewer |
+| G8 | 复盘已写入 docs/retro/round-{N}.md + lessons-learned.md 已更新 (META-005) | CI (retro-gate job) |
 
 ---
 
