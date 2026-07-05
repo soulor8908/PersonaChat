@@ -5,17 +5,18 @@
 
 | 指标 | 数值 |
 |------|------|
-| 规则 | 21 条 |
+| 规则 | 23 条 |
 | - ai-behavior | 7 |
 | - architecture | 3 |
 | - coding | 4 |
-| - meta | 4 |
+| - frontend | 1 |
+| - meta | 5 |
 | - security | 3 |
 | 契约 Schema | 5 个 |
 | API 路由 | 9 条 |
-| API 源文件 | 15 个 |
+| API 源文件 | 16 个 |
 | Spec 文档 | 1 个 |
-| E2E 测试 | 2 个 |
+| E2E 测试 | 3 个 |
 | CI | 已配置 |
 | 文档 | 20 个 |
 
@@ -55,10 +56,12 @@ packages/contracts/  ← Zod SSOT 契约层 (前后端共享)
 | CODE-002 | 禁止吞错误 | coding | blocking | ✅ |
 | CODE-003 | 命名约定 | coding | suggestion | ✅ |
 | CODE-004 | 模块边界 | coding | blocking | ✅ |
+| FRONTEND-001 | 前端可变配置从 API 获取 | frontend | advisory | ✅ |
 | META-001 | 无校验不立规 | meta | blocking | ✅ |
 | META-002 | 规则 PR 准入 | meta | blocking | 👁 |
 | META-003 | 声明即实现 | meta | blocking | ✅ |
 | META-004 | 实现即声明 | meta | blocking | ✅ |
+| META-005 | 复盘必写入 | meta | blocking | ✅ |
 | SEC-001 | 路由默认受保护 | security | blocking | ✅ |
 | SEC-002 | 密钥不入仓 | security | blocking | ✅ |
 | SEC-003 | 输入校验 | security | blocking | ✅ |

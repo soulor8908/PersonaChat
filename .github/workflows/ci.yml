@@ -41,7 +41,7 @@ jobs:
         run: pnpm test
 
   spec-binding:
-    name: spec-binding (Dx ↔ code)
+    name: spec-binding (Dx <-> code)
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
@@ -55,5 +55,42 @@ jobs:
       - name: Spec-Binding check
         run: node scripts/check-spec-binding.mjs
 
-  # 小程序 E2E 暂无 CI 自动化 — 微信小程序依赖开发者工具和真机环境
-  # 路线图：后续接入 miniprogram-automator 或 API 级 E2E
+  retro-gate:
+    name: retro (G8 gate)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Retro index check (META-005)
+        run: node scripts/gen-retro-index.mjs
+
+  smoke-test:
+    name: smoke-test (health + models)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install + test
+        run: pnpm install --frozen-lockfile && pnpm dev:api &
+        shell: bash
+
+      - name: Wait + smoke
+        run: sleep 5 && node scripts/smoke-test.mjs
+        shell: bash

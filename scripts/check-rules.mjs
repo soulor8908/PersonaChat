@@ -624,6 +624,37 @@ CHECKS.push(async () => {
 })
 
 // ═══════════════════════════════════════════════
+// META-005: 复盘必写入
+// ═══════════════════════════════════════════════
+CHECKS.push(async () => {
+  const retroDir = join(ROOT, 'docs', 'retro')
+  if (!existsSync(retroDir)) return { rule: 'META-005', ok: true, msg: 'Retro 目录不存在，跳过' }
+
+  const roundFiles = readdirSync(retroDir).filter(f => f.startsWith('round-') && f.endsWith('.md'))
+  const lessonsFile = join(retroDir, 'lessons-learned.md')
+
+  if (!existsSync(lessonsFile)) {
+    return { rule: 'META-005', ok: false, msg: 'lessons-learned.md 不存在，请运行 pnpm retro' }
+  }
+
+  const lessonsContent = readFileSync(lessonsFile, 'utf-8')
+  const lessonCount = (lessonsContent.match(/\(Round \d+\)/g) || []).length
+
+  if (lessonCount < roundFiles.length) {
+    return {
+      rule: 'META-005',
+      ok: false,
+      msg: `复盘教训数 (${lessonCount}) 少于复盘文档数 (${roundFiles.length})，运行 pnpm retro 更新`,
+    }
+  }
+
+  return {
+    rule: 'META-005',
+    ok: true,
+    msg: `复盘合规: ${roundFiles.length} 轮, ${lessonCount} 条教训`,
+  }
+})
+// ═══════════════════════════════════════════════
 // META-004: 实现即声明 — 脚本有分支 → 必须有对应规则文档
 // ═══════════════════════════════════════════════
 CHECKS.push(async () => {
