@@ -11,7 +11,7 @@ on:
 
 jobs:
   trinity:
-    name: trinity (typecheck + rules + test)
+    name: trinity (typecheck + rules + lint + test)
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -35,7 +35,10 @@ jobs:
 
       - name: Rule check
         run: pnpm check
-        # check-rules.mjs — 15 项 enforcement，阻断项不通过则 CI 红
+        # check-rules.mjs — 16 项 enforcement，阻断项不通过则 CI 红
+
+      - name: Lint
+        run: pnpm lint
 
       - name: Unit tests
         run: pnpm test
@@ -95,10 +98,38 @@ jobs:
         run: sleep 5 && node scripts/smoke-test.mjs
         shell: bash
 
+  frontend-test:
+    name: frontend (vitest + jsdom)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Frontend unit tests (jsdom)
+        working-directory: apps/web
+        run: pnpm test
+
+      - name: Frontend lint (Tailwind class checks)
+        working-directory: apps/web
+        run: pnpm lint
+
   deploy-staging:
     name: deploy-staging
     if: github.ref == 'refs/heads/main'
-    needs: [trinity, spec-binding, retro-gate, smoke-test]
+    needs: [trinity, spec-binding, retro-gate, frontend-test, smoke-test]
     runs-on: ubuntu-latest
     timeout-minutes: 10
 

@@ -12,6 +12,15 @@ database_id = "fc79067a-1948-41ef-903b-5a39ee997696"
 [env.production]
 name = "persona-chat-api"
 
+# 生产环境 D1（环境不继承顶层配置）
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "persona-chat-db"
+database_id = "fc79067a-1948-41ef-903b-5a39ee997696"
+
+[env.production.vars]
+ENVIRONMENT = "production"
+
 # ── 环境变量 ──
 [vars]
 ENVIRONMENT = "development"

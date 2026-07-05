@@ -14,7 +14,7 @@
     "lint": "pnpm -r lint",
     "check": "node scripts/check-rules.mjs",
     "check:spec-binding": "node scripts/check-spec-binding.mjs",
-    "trinity": "pnpm typecheck && node scripts/check-rules.mjs && pnpm test",
+    "trinity": "pnpm typecheck && node scripts/check-rules.mjs && pnpm lint && pnpm test",
     "snapshot": "node scripts/gen-context-snapshot.mjs",
     "delta": "node scripts/gen-round-delta.mjs",
     "retro": "node scripts/gen-retro-index.mjs",

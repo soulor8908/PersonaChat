@@ -47,22 +47,22 @@ export function Create() {
   }
 
   return (
-    <div className="flex flex-col h-full overflow-y-auto">
-      <div className="p-4">
-        <h2 className="text-lg font-bold mb-4">创建人格</h2>
+    <div className="flex h-full flex-col overflow-y-auto">
+      <div className="p-3">
+        <h2 className="mb-4 text-lg font-bold">创建人格</h2>
         <div className="flex flex-col gap-3">
-          <input className="w-full bg-surface-800 rounded-lg px-3 py-2 text-sm text-white border border-surface-700 focus:border-primary-500 outline-none" placeholder="名称 *" value={name} onChange={e => setName(e.target.value)} maxLength={100} />
-          <input className="w-full bg-surface-800 rounded-lg px-3 py-2 text-sm text-white border border-surface-700 focus:border-primary-500 outline-none" placeholder="描述" value={desc} onChange={e => setDesc(e.target.value)} maxLength={500} />
+          <input className="w-full rounded-lg border border-surface-700 bg-surface-800 px-3 py-2 text-sm text-white placeholder-slate-400 outline-none focus:border-primary-500" placeholder="名称 *" value={name} onChange={e => setName(e.target.value)} maxLength={100} />
+          <input className="w-full rounded-lg border border-surface-700 bg-surface-800 px-3 py-2 text-sm text-white placeholder-slate-400 outline-none focus:border-primary-500" placeholder="描述" value={desc} onChange={e => setDesc(e.target.value)} maxLength={500} />
           <div>
-            <textarea className="w-full bg-surface-800 rounded-lg px-3 py-2 text-sm text-white border border-surface-700 focus:border-primary-500 outline-none h-32 resize-none" placeholder="系统提示 * — 定义人格的说话方式..." value={prompt} onChange={e => setPrompt(e.target.value)} maxLength={8000} />
-            <div className="text-xs text-slate-500 text-right">{prompt.length}/8000</div>
+            <textarea className="h-32 w-full resize-none rounded-lg border border-surface-700 bg-surface-800 px-3 py-2 text-sm text-white placeholder-slate-400 outline-none focus:border-primary-500" placeholder="系统提示 * — 定义人格的说话方式..." value={prompt} onChange={e => setPrompt(e.target.value)} maxLength={8000} />
+            <div className="text-right text-xs text-slate-500">{prompt.length}/8000</div>
           </div>
           <div>
-            <div className="text-xs text-slate-400 mb-1.5">可用工具</div>
-            <div className="flex gap-2 flex-wrap">
+            <div className="mb-1.5 text-xs text-slate-400">可用工具</div>
+            <div className="flex flex-wrap gap-2">
               {TOOLS.map(t => (
                 <button key={t.key} onClick={() => toggleTool(t.key)}
-                  className={`px-3 py-1 rounded-full text-xs transition-colors ${tools.includes(t.key) ? 'bg-primary-500 text-white' : 'bg-surface-800 text-slate-400 border border-surface-700'}`}
+                  className={`rounded-full px-3 py-1 text-xs transition-colors ${tools.includes(t.key) ? 'bg-primary-500 text-white' : 'border border-surface-700 bg-surface-800 text-slate-400'}`}
                 >{t.label}</button>
               ))}
             </div>
@@ -72,9 +72,9 @@ export function Create() {
 
       {/* Preview */}
       {prompt && (
-        <div className="border-t border-surface-700 p-4">
-          <div className="text-sm font-medium mb-2">💬 预览测试</div>
-          <div className="bg-surface-800 rounded-xl p-3 max-h-40 overflow-y-auto mb-2 flex flex-col gap-2">
+        <div className="border-t border-surface-700 p-3">
+          <div className="mb-2 text-sm font-medium">💬 预览测试</div>
+          <div className="mb-2 flex max-h-60 flex-col gap-2 overflow-y-auto rounded-xl bg-surface-800 p-3">
             {previewMsgs.map((m, i) => (
               <div key={i} className={`text-sm ${m.role === 'user' ? 'text-primary-400' : 'text-slate-300'}`}>
                 <span className="text-xs text-slate-500">{m.role === 'user' ? '你' : 'AI'}: </span>{m.content}
@@ -83,16 +83,16 @@ export function Create() {
             {previewLoading && <div className="text-sm text-slate-500">...</div>}
           </div>
           <div className="flex gap-2">
-            <input className="flex-1 bg-surface-700 rounded-lg px-3 py-1.5 text-sm text-white border border-surface-600 outline-none" placeholder="测试一句话..." value={previewInput}
+            <input className="border-surface-600 flex-1 rounded-lg border bg-surface-700 px-3 py-1.5 text-sm text-white placeholder-slate-400 outline-none" placeholder="测试一句话..." value={previewInput}
               onChange={e => setPreviewInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); preview() } }} />
-            <button onClick={preview} className="px-3 py-1.5 bg-surface-700 text-sm text-white rounded-lg">发送</button>
+            <button onClick={preview} className="rounded-lg bg-surface-700 px-3 py-1.5 text-sm text-white">发送</button>
           </div>
         </div>
       )}
 
-      <div className="p-4 pt-0">
+      <div className="p-3 pt-0">
         <button onClick={submit} disabled={submitting || !name || !prompt}
-          className="w-full py-2.5 bg-primary-500 text-white rounded-xl font-medium disabled:opacity-40 transition-opacity"
+          className="w-full rounded-xl bg-primary-500 py-2.5 font-medium text-white transition-opacity disabled:opacity-40"
         >{submitting ? '创建中...' : '🚀 一键发布'}</button>
       </div>
     </div>

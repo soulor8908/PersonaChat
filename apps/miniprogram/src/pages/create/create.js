@@ -37,7 +37,7 @@ Page({
           modelNames: res.data.map(m => m.name),
         })
       }
-    } catch (_e) { void (_e as Error) }
+    } catch (_e) { /* catch silently */ }
   },
 
   onNameInput(e) { this.setData({ name: e.detail.value }) },

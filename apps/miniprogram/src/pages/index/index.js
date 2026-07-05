@@ -45,7 +45,7 @@ Page({
     try {
       const res = await PersonaApi.listHot()
       this.setData({ hotPersonas: res.data || [] })
-    } catch (_e) { void (_e as Error) }
+    } catch (_e) { /* catch silently */ }
   },
 
   async loadPersonas() {

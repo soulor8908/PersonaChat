@@ -36,6 +36,8 @@ Step 6: 如果无 Spec → 拒绝编码，先 spawn BA subagent 写 PRD
 - **不要**吞异常 — 要么处理要么上抛（违反 CODE-002）
 - **不要**硬编码 API key / secret / token（违反 SEC-002）
 - **不要**跳过输入校验 — 路由层必须 Zod.parse()（违反 SEC-003）
+- **不要**在 apps/web 中添加页面组件而不添加冒烟测试（违反 FRONTEND-001）
+- **不要**使用不存在的 Tailwind CSS class（违反 FRONTEND-003）
 
 ## 五角色速查
 
@@ -60,6 +62,8 @@ Step 6: 如果无 Spec → 拒绝编码，先 spawn BA subagent 写 PRD
 | G5 | `pnpm trinity` 全绿 | 驳回 impl-writer |
 | G6 | check-rules.mjs 阻断项全过 | 驳回 impl-writer |
 | G7 | Reviewer 逐方法核对通过 | 驳回并标注需改 |
+| G8 | UI 渲染测试 — `apps/web/src/test/` 中每个页面有冒烟测试 | 缺测试驳回 impl-writer |
+| G9 | Tailwind CSS 无矛盾 class — ESLint `no-contradicting-classname` 无 error | 有 error 驳回 impl-writer |
 
 ## 每次改动必跑
 

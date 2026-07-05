@@ -73,7 +73,7 @@ export function ChatPage() {
           setLoading(false)
           abortRef.current = null
         },
-        onError: (err) => {
+        onError: () => {
           setMessages(prev => prev.map(m => m.id === aiId ? { ...m, content: m.content || '(发送失败)', streaming: false } : m))
           setLoading(false)
         },
@@ -96,33 +96,33 @@ export function ChatPage() {
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex h-full flex-col">
       {/* Header */}
-      <div className="flex items-center gap-2 p-3 bg-surface-800 border-b border-surface-700 flex-shrink-0">
-        <button onClick={() => navigate(-1)} className="text-slate-400 text-lg">←</button>
-        <div className="w-8 h-8 rounded-full bg-primary-500 flex items-center justify-center text-sm font-bold">{String(persona.name || '?')[0]}</div>
-        <div className="flex-1 min-w-0">
-          <div className="text-sm font-medium truncate">{persona.name as string}</div>
+      <div className="flex flex-shrink-0 items-center gap-2 border-b border-surface-700 bg-surface-800 p-3">
+        <button onClick={() => navigate(-1)} className="text-lg text-slate-400">←</button>
+        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-500 text-sm font-bold">{String(persona.name || '?')[0]}</div>
+        <div className="min-w-0 flex-1">
+          <div className="truncate text-sm font-medium">{persona.name as string}</div>
         </div>
-        <select value={model} onChange={e => setModel(e.target.value)} className="bg-surface-700 text-xs rounded px-2 py-1 border border-surface-600 text-slate-300">
+        <select value={model} onChange={e => setModel(e.target.value)} className="border-surface-600 rounded border bg-surface-700 px-2 py-1 text-xs text-slate-300">
           {models.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
         </select>
       </div>
 
       {/* Messages */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 flex flex-col gap-3">
-        {messages.length === 0 && <div className="text-center text-slate-500 py-10">开始对话吧</div>}
+      <div ref={scrollRef} className="flex flex-1 flex-col gap-3 overflow-y-auto p-3">
+        {messages.length === 0 && <div className="py-10 text-center text-slate-500">开始对话吧</div>}
         {messages.map(m => (
           <div key={m.id} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[80%] rounded-2xl px-3.5 py-2.5 ${m.role === 'user' ? 'bg-primary-500 text-white' : 'bg-surface-800 border border-surface-700 text-slate-200'}`}>
-              <div className="text-sm whitespace-pre-wrap break-words">{m.content || (m.streaming ? '...' : '')}</div>
-              {m.toolStatus && <div className="text-xs text-yellow-400 mt-1">{m.toolStatus}</div>}
+            <div className={`max-w-[80%] rounded-2xl px-3.5 py-2.5 ${m.role === 'user' ? 'bg-primary-500 text-white' : 'border border-surface-700 bg-surface-800 text-slate-200'}`}>
+              <div className="whitespace-pre-wrap break-words text-sm">{m.content || (m.streaming ? '...' : '')}</div>
+              {m.toolStatus && <div className="mt-1 text-xs text-semantic-warning">{m.toolStatus}</div>}
               {m.role === 'assistant' && !m.streaming && m.recordId && (
-                <div className="flex gap-1 mt-1.5 pt-1 border-t border-surface-700">
+                <div className="mt-1.5 flex gap-1 border-t border-surface-700 pt-1">
                   <button onClick={() => rateMessage(m.recordId!, m.userRating === 'like' ? 'dislike' : 'like')}
-                    className={`text-xs px-1.5 ${m.userRating === 'like' ? 'text-primary-400' : 'text-slate-500 hover:text-slate-300'}`}>👍</button>
+                    className={`px-1.5 text-xs ${m.userRating === 'like' ? 'text-primary-400' : 'text-slate-500 hover:text-slate-300'}`}>👍</button>
                   <button onClick={() => rateMessage(m.recordId!, m.userRating === 'dislike' ? 'like' : 'dislike')}
-                    className={`text-xs px-1.5 ${m.userRating === 'dislike' ? 'text-red-400' : 'text-slate-500 hover:text-slate-300'}`}>👎</button>
+                    className={`px-1.5 text-xs ${m.userRating === 'dislike' ? 'text-semantic-danger' : 'text-slate-500 hover:text-slate-300'}`}>👎</button>
                 </div>
               )}
             </div>
@@ -131,17 +131,17 @@ export function ChatPage() {
       </div>
 
       {/* Input */}
-      <div className="p-3 bg-surface-800 border-t border-surface-700 flex-shrink-0">
+      <div className="flex-shrink-0 border-t border-surface-700 bg-surface-800 p-3">
         <div className="flex gap-2">
           <input value={input} onChange={e => setInput(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() } }}
-            className="flex-1 bg-surface-700 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-400 border border-surface-600 focus:border-primary-500 outline-none"
+            className="border-surface-600 flex-1 rounded-lg border bg-surface-700 px-3 py-2 text-sm text-white placeholder-slate-400 outline-none focus:border-primary-500"
             placeholder="输入消息... (Enter 发送)" disabled={loading}
           />
           {loading ? (
-            <button onClick={stop} className="px-4 py-2 bg-red-500 text-white text-sm rounded-lg font-medium">停止</button>
+            <button onClick={stop} className="rounded-lg bg-semantic-danger px-4 py-2 text-sm font-medium text-white">停止</button>
           ) : (
-            <button onClick={send} disabled={!input.trim()} className="px-4 py-2 bg-primary-500 text-white text-sm rounded-lg font-medium disabled:opacity-40">发送</button>
+            <button onClick={send} disabled={!input.trim()} className="rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white disabled:opacity-40">发送</button>
           )}
         </div>
       </div>

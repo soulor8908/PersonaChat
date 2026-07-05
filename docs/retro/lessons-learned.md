@@ -69,6 +69,7 @@
 | L18 | 工作流 | 多轮连续交付时容易进入"流水线模式"。每轮开始前检查上一轮文档是否完整 | R7-10 | AGENTS.md 自查清单 |
 | L19 | 工作流 | AGENTS.md 的"Step 0"必须是 Spec 存在性检查，不能假设前序流程已完成 | R7-10 | 新增 AI-008 |
 | L20 | 质量 | 代码和测试可通过 trinity 验证，但流程合规无人检查 — 需要自动化门禁 | R7-10 | check-rules 扩展 |
+| L21 | 测试 | **前端视觉质量零防御** — apps/web 有 16 个可视化/样式问题（无效 Tailwind class、硬编码颜色、padding 不统一等），全部零检测。根因：apps/web 无测试文件、无 jsdom 环境、无 eslint-plugin-tailwindcss、check-rules 全跳过前端代码。修复：三层方案 (a) 修复现有样式 (b) 添加 jsdom 组件冒烟测试 (c) ESLint tailwindcss 规则 + check-rules FRONTEND-001/002 强制执行 | R11 | FRONTEND-001/002, eslint-plugin-tailwindcss |
 
 ---
 

@@ -694,6 +694,62 @@ CHECKS.push(async () => {
   }
 })
 
+// ═══════════════════════════════════════════════
+// FRONTEND-001: 每个页面组件必须有对应的测试文件
+// ═══════════════════════════════════════════════
+CHECKS.push(async () => {
+  const webPages = join(ROOT, 'apps', 'web', 'src', 'pages')
+  if (!existsSync(webPages)) return { rule: 'FRONTEND-001', ok: true, msg: '[advisory] apps/web/src/pages 不存在，跳过' }
+
+  const pageFiles = readdirSync(webPages).filter(f => f.endsWith('.tsx') && !f.endsWith('.test.tsx'))
+  const testDir = join(ROOT, 'apps', 'web', 'src', 'test')
+  if (!existsSync(testDir)) {
+    return { rule: 'FRONTEND-001', ok: false, msg: `测试目录不存在。为以下 ${pageFiles.length} 个页面创建测试: ${pageFiles.join(', ')}` }
+  }
+
+  const testFiles = readdirSync(testDir).filter(f => /\.(test|spec)\.(ts|tsx)$/.test(f))
+  if (testFiles.length === 0) {
+    return { rule: 'FRONTEND-001', ok: false, msg: `测试目录存在但无测试文件。为以下 ${pageFiles.length} 个页面创建测试: ${pageFiles.join(', ')}` }
+  }
+
+  // 每个页面应有独立测试文件或一个综合测试文件覆盖所有页面
+  const missing = pageFiles.filter(page => {
+    const baseName = page.replace('.tsx', '')
+    return !testFiles.some(tf => tf.toLowerCase().includes(baseName.toLowerCase()))
+  })
+
+  // 允许单文件覆盖（如 all-pages.test.tsx / app.test.tsx / pages.test.tsx）
+  if (missing.length === pageFiles.length && testFiles.length === 1) {
+    return { rule: 'FRONTEND-001', ok: true, msg: `共 ${pageFiles.length} 个页面，由 1 个综合测试文件覆盖: ${testFiles[0]}` }
+  }
+
+  return {
+    rule: 'FRONTEND-001',
+    ok: missing.length === 0,
+    msg: missing.length > 0
+      ? `以下页面缺少组件测试: ${missing.join(', ')}。每个页面组件都需要冒烟测试。`
+      : `所有 ${pageFiles.length} 个页面组件都有对应的测试文件`,
+  }
+})
+
+// ═══════════════════════════════════════════════
+// FRONTEND-002: apps/web vitest 配置使用 jsdom
+// ═══════════════════════════════════════════════
+CHECKS.push(async () => {
+  const configPaths = [join(ROOT, 'apps', 'web', 'vitest.config.ts'), join(ROOT, 'apps', 'web', 'vitest.config.js')]
+  const configFile = configPaths.find(p => existsSync(p))
+  if (!configFile) {
+    return { rule: 'FRONTEND-002', ok: false, msg: 'apps/web/vitest.config.ts 不存在。添加并设置 environment: "jsdom"。' }
+  }
+
+  const content = readFileSync(configFile, 'utf-8')
+  if (!content.includes('jsdom')) {
+    return { rule: 'FRONTEND-002', ok: false, msg: 'apps/web/vitest.config.ts 未设置 environment: "jsdom"。React 组件测试需要 jsdom。' }
+  }
+
+  return { rule: 'FRONTEND-002', ok: true, msg: 'vitest.config.ts 正确配置了 jsdom 环境' }
+})
+
 // ── 辅助函数 ──
 function walkDir(dir) {
   const files = []
