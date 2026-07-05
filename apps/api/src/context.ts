@@ -8,6 +8,7 @@ export interface Env {
   DEEPSEEK_API_KEY?: string
   GLM_API_KEY?: string
   OPENAI_API_KEY?: string
+  WEB_SEARCH_API_KEY?: string  // TECH-API-015 D18
   API_KEY?: string
   ALLOWED_ORIGINS?: string
   ENVIRONMENT?: 'development' | 'production'

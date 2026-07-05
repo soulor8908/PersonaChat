@@ -2,6 +2,7 @@
   "pages": [
     "src/pages/index/index",
     "src/pages/chat/chat",
+    "src/pages/create/create",
     "src/pages/history/history",
     "src/pages/profile/profile"
   ],

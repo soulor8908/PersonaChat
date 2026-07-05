@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 滚动条样式 */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-thumb { background: #475569; border-radius: 2px; }
+
+/* 移动端安全区域 */
+body { padding-bottom: env(safe-area-inset-bottom); }

@@ -1,4 +1,4 @@
-<!-- 人格库首页 -->
+<!-- 人格库首页 (TECH-API-013 D14: 市场版) -->
 <view class="container">
   <!-- 搜索栏 -->
   <view class="search-bar">
@@ -10,18 +10,49 @@
     />
   </view>
 
-  <!-- 分类标签 -->
-  <scroll-view class="category-scroll" scroll-x>
-    <view
-      class="category-tag {{activeCategory === item.key ? 'active' : ''}}"
-      wx:for="{{categories}}"
-      wx:key="key"
-      bindtap="onCategoryTap"
-      data-key="{{item.key}}"
-    >
-      {{item.label}}
+  <!-- 热门推荐横滚 -->
+  <view class="hot-section" wx:if="{{hotPersonas.length > 0}}">
+    <view class="section-title">🔥 热门推荐</view>
+    <scroll-view class="hot-scroll" scroll-x>
+      <view
+        class="hot-card"
+        wx:for="{{hotPersonas}}"
+        wx:key="id"
+        bindtap="onPersonaTap"
+        data-id="{{item.id}}"
+      >
+        <view class="hot-avatar">{{item.name[0]}}</view>
+        <view class="hot-name">{{item.name}}</view>
+        <view class="hot-stats">{{item.messageCount}} 次对话 · {{Math.round(item.likeRate * 100)}}% 好评</view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 分类标签 + 排序 -->
+  <view class="filter-row">
+    <scroll-view class="category-scroll" scroll-x>
+      <view
+        class="category-tag {{activeCategory === item.key ? 'active' : ''}}"
+        wx:for="{{categories}}"
+        wx:key="key"
+        bindtap="onCategoryTap"
+        data-key="{{item.key}}"
+      >
+        {{item.label}}
+      </view>
+    </scroll-view>
+    <view class="sort-tabs">
+      <view
+        class="sort-tab {{activeSort === item.key ? 'active' : ''}}"
+        wx:for="{{sortOptions}}"
+        wx:key="key"
+        bindtap="onSortTap"
+        data-key="{{item.key}}"
+      >
+        {{item.label}}
+      </view>
     </view>
-  </scroll-view>
+  </view>
 
   <!-- 人格列表 -->
   <view class="persona-list">
@@ -35,15 +66,19 @@
       <view class="persona-avatar">{{item.name[0]}}</view>
       <view class="persona-info">
         <view class="persona-name">{{item.name}}</view>
-        <view class="persona-desc">{{item.description}}</view>
+        <view class="persona-desc">{{item.description || '暂无简介'}}</view>
         <view class="persona-meta">
           <text class="persona-category">{{item.categoryLabel}}</text>
-          <text class="persona-stars" wx:if="{{item.stargazers_count > 0}}">
-            ⭐ {{item.stargazers_count}}
-          </text>
+          <text class="persona-stats">💬 {{item.messageCount}}</text>
+          <text class="persona-rate">👍 {{item.likePercent}}%</text>
         </view>
       </view>
     </view>
+  </view>
+
+  <!-- 创建入口 -->
+  <view class="create-entry" bindtap="onCreateTap">
+    <text>+ 创建人格</text>
   </view>
 
   <!-- 空状态 -->

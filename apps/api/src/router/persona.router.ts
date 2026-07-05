@@ -7,16 +7,27 @@ import {
   personaCategorySchema,
   personaCreateSchema,
   personaUpdateSchema,
+  builtinModelIdSchema,
+  chatMessageSchema,
 } from '@personachat/contracts'
+import { z } from 'zod'
 import type { PersonaService } from '../service/persona-svc.js'
+import type { ChatService } from '../service/chat-svc.js'
 
-export function createPersonaRouter(personaService: PersonaService) {
+export function createPersonaRouter(personaService: PersonaService, chatService?: ChatService) {
   const router = new Hono()
 
-  // GET /api/personas — 人格列表
+  // GET /api/personas — 人格列表 (TECH-API-013 D14: 排序+统计)
   router.get('/', async (c) => {
-    const query = personaQuerySchema.parse(c.req.query())
+    const raw = c.req.query()
+    const query = personaQuerySchema.parse({ ...raw, sort: raw.sort || undefined })
     const personas = await personaService.list(query)
+    return c.json({ ok: true, data: personas })
+  })
+
+  // TECH-API-013 D14: 热门推荐
+  router.get('/hot', async (c) => {
+    const personas = await personaService.listHot()
     return c.json({ ok: true, data: personas })
   })
 
@@ -63,6 +74,31 @@ export function createPersonaRouter(personaService: PersonaService) {
     })
     return c.json({ ok: true, data: persona })
   })
+
+  // TECH-API-010 D11: 人格统计数据
+  if (chatService) {
+    router.get('/:id/stats', async (c) => {
+      const id = c.req.param('id')
+      const stats = await chatService.getPersonaStats(id)
+      return c.json({ ok: true, data: stats })
+    })
+  }
+
+  // TECH-API-014 D15: 人格预览 — 不保存，即时测试对话
+  if (chatService) {
+    router.post('/preview', async (c) => {
+      const body = await c.req.json()
+      const parsed = z.object({
+        systemPrompt: z.string().min(1).max(8000),
+        messages: z.array(chatMessageSchema).min(1),
+        model: builtinModelIdSchema.or(z.string()).optional(),
+        apiKey: z.string().optional(),
+      }).parse(body)
+      const model = parsed.model || 'deepseek-v3'
+      const result = await chatService.preview(parsed.systemPrompt, parsed.messages, model, parsed.apiKey)
+      return c.json({ ok: true, reply: result.reply, model: result.model })
+    })
+  }
 
   return router
 }

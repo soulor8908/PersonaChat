@@ -1,0 +1,67 @@
+<!-- 人格工坊 (TECH-API-014 D15) -->
+<view class="create-container">
+  <view class="form-section">
+    <view class="section-title">创建人格</view>
+
+    <view class="form-item">
+      <text class="label">名称 *</text>
+      <input class="input" placeholder="例如: 卡帕西" value="{{name}}" bindinput="onNameInput" maxlength="100" />
+    </view>
+
+    <view class="form-item">
+      <text class="label">描述</text>
+      <input class="input" placeholder="一句话描述这个人格" value="{{description}}" bindinput="onDescInput" maxlength="500" />
+    </view>
+
+    <view class="form-item">
+      <text class="label">系统提示 *</text>
+      <textarea class="textarea" placeholder="定义人格的说话方式、知识范围、语气..." value="{{systemPrompt}}" bindinput="onPromptInput" maxlength="8000" />
+      <text class="char-count">{{promptLen}}/8000</text>
+    </view>
+
+    <view class="form-item">
+      <text class="label">模型</text>
+      <picker mode="selector" range="{{modelNames}}" bindchange="onModelChange">
+        <view class="picker">{{modelNames[currentModel] || '选择模型'}} ⚙️</view>
+      </picker>
+    </view>
+
+    <!-- 工具选择 (TECH-API-015 D18) -->
+    <view class="form-item">
+      <text class="label">可用工具</text>
+      <view class="tool-checkboxes">
+        <view
+          class="tool-checkbox {{item.checked ? 'checked' : ''}}"
+          wx:for="{{availableTools}}"
+          wx:key="key"
+          bindtap="onToolToggle"
+          data-key="{{item.key}}"
+        >
+          {{item.label}}
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 预览区域 -->
+  <view class="preview-section" wx:if="{{systemPrompt}}">
+    <view class="section-title">💬 预览测试</view>
+    <scroll-view class="preview-messages" scroll-y>
+      <view wx:for="{{previewMessages}}" wx:key="id" class="p-msg {{item.role}}">
+        <text>{{item.content}}</text>
+      </view>
+      <view wx:if="{{previewLoading}}" class="p-msg assistant">...</view>
+    </scroll-view>
+    <view class="preview-input-row">
+      <input class="p-input" placeholder="测试一句话..." value="{{previewInput}}" bindinput="onPreviewInput" bindconfirm="onPreviewSend" />
+      <view class="p-send-btn" bindtap="onPreviewSend">发送</view>
+    </view>
+  </view>
+
+  <!-- 提交 -->
+  <view class="submit-section">
+    <button class="submit-btn" bindtap="onSubmit" loading="{{submitting}}" disabled="{{!name || !systemPrompt}}">
+      {{submitting ? '创建中...' : '🚀 一键发布'}}
+    </button>
+  </view>
+</view>

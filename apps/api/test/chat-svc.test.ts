@@ -18,7 +18,7 @@ vi.mock('../src/domain/llm.js', () => ({
     free: true,
   })),
   buildSystemMessage: vi.fn((prompt: string) => ({ role: 'system', content: prompt })),
-  callLLM: vi.fn(async () => ({ reply: 'Hello from LLM' })),
+  callLLM: vi.fn(async () => ({ content: 'Hello from LLM' })),
   findModel: vi.fn((id: string) => {
     if (id === 'unknown-model') return undefined
     return { id: 'deepseek-v3', name: 'DeepSeek V3', baseURL: '', deployName: 'deepseek-chat', free: true, envKey: 'DEEPSEEK_API_KEY' }
@@ -118,6 +118,7 @@ describe('ChatService', () => {
       [{ role: 'user', content: 'Hi' }],
       'Hello from LLM',
       'deepseek-v3',
+      undefined, // parentRecordId
     )
   })
 

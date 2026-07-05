@@ -5,4 +5,5 @@
 export * from './schemas/common.js'
 export * from './schemas/persona.js'
 export * from './schemas/chat.js'
+export * from './schemas/tool.js'
 export * from './schemas/user.js'

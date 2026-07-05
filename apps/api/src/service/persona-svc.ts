@@ -1,7 +1,7 @@
 // ── 人格业务逻辑层 ──
 // TECH-API-004 D6: 业务层只编排，不做数据库操作
 
-import type { Persona, PersonaQuery, PersonaSource, PersonaCreate, PersonaUpdate } from '@personachat/contracts'
+import type { Persona, PersonaQuery, PersonaSource, PersonaCreate, PersonaUpdate, PersonaSummary, PersonaSort } from '@personachat/contracts'
 import { PersonaRepository } from '../repository/persona-repo.js'
 import { Errors } from '../errors.js'
 import { parseSkillMd } from '../domain/persona-parser.js'
@@ -13,8 +13,14 @@ function generateId(): string {
 export class PersonaService {
   constructor(private repo: PersonaRepository) {}
 
-  async list(query: PersonaQuery): Promise<Persona[]> {
-    return this.repo.findAll(query.category, query.search)
+  // TECH-API-013 D14: 列表查询支持排序 + 统计摘要
+  async list(query: PersonaQuery & { sort?: PersonaSort }): Promise<PersonaSummary[]> {
+    return this.repo.findAllWithStats(query.category, query.search, query.sort ?? 'popular')
+  }
+
+  // TECH-API-013 D14: 热门推荐 TOP 10
+  async listHot(limit = 10): Promise<PersonaSummary[]> {
+    return this.repo.findTop(limit)
   }
 
   async getById(id: string): Promise<Persona> {
@@ -34,6 +40,7 @@ export class PersonaService {
       systemPrompt: input.systemPrompt,
       sourceUrl: input.sourceUrl,
       stargazersCount: 0,
+      tools: input.tools ?? [],
       createdAt: now,
       updatedAt: now,
     }
@@ -53,6 +60,7 @@ export class PersonaService {
       category: input.category,
       systemPrompt: input.systemPrompt,
       sourceUrl: input.sourceUrl ?? undefined,
+      tools: input.tools,
     })
 
     // 返回更新后的实体
@@ -83,6 +91,7 @@ export class PersonaService {
       category: source.category,
       sourceUrl: `https://github.com/${source.owner}/${source.repo}`,
       stargazersCount: 0,
+      tools: [],
     }
 
     await this.repo.upsert(persona)

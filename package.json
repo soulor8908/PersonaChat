@@ -6,6 +6,8 @@
   "type": "module",
   "scripts": {
     "dev:api": "pnpm --filter @personachat/api dev",
+    "dev:web": "pnpm --filter @personachat/web dev",
+    "build:web": "pnpm --filter @personachat/web build",
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "pnpm -r typecheck",

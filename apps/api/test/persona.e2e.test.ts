@@ -268,4 +268,43 @@ describe('Persona CRUD E2E', () => {
     expect(body.data.length).toBe(1)
     expect(body.data[0].category).toBe('educator')
   })
+
+  // ── 市场 API (TECH-API-013 D14) ──
+  it('GET /api/personas?sort=popular returns with stats', async () => {
+    await app.request('/api/personas', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: 'Popular P', category: 'educator', systemPrompt: 'test' }),
+    })
+
+    const res = await app.request('/api/personas?sort=popular')
+    expect(res.status).toBe(200)
+    const body = await res.json()
+    expect(body.data.length).toBeGreaterThanOrEqual(1)
+    // 每个 persona 应该附带 likeRate/messageCount
+    expect(body.data[0].likeRate).toBe(0)
+    expect(body.data[0].messageCount).toBe(0)
+  })
+
+  it('GET /api/personas/hot returns top personas', async () => {
+    await app.request('/api/personas', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: 'Hot P', category: 'thinker', systemPrompt: 'test' }),
+    })
+
+    const res = await app.request('/api/personas/hot')
+    expect(res.status).toBe(200)
+    const body = await res.json()
+    expect(body.data.length).toBeGreaterThanOrEqual(1)
+    expect(body.data[0].likeRate).toBe(0)
+    expect(body.data[0].messageCount).toBe(0)
+  })
+
+  it('GET /api/personas?sort=recent returns sorted by date', async () => {
+    const res = await app.request('/api/personas?sort=recent')
+    expect(res.status).toBe(200)
+    const body = await res.json()
+    expect(Array.isArray(body.data)).toBe(true)
+  })
 })

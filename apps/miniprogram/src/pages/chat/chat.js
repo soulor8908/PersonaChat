@@ -98,28 +98,150 @@ Page({
     if (!text || this.data.loading) return
 
     const userMsg = { role: 'user', content: text, id: 'msg-' + Date.now() }
-    const messages = [...this.data.messages, userMsg]
+    // 预留 AI 占位消息，流式逐字填充
+    const aiPlaceholderId = 'msg-' + (Date.now() + 1)
+    const aiPlaceholder = { role: 'assistant', content: '', id: aiPlaceholderId, streaming: true }
+    const messages = [...this.data.messages, userMsg, aiPlaceholder]
     this.setData({ messages, inputText: '', loading: true })
     this.scrollToBottom()
 
-    try {
-      const res = await ChatApi.send({
-        personaId: this.data.persona.id,
-        messages: messages.map((m) => ({ role: m.role, content: m.content })),
-        model: this.data.modelKeys[this.data.currentModel],
-      })
+    // TECH-API-008 D9: 流式发送
+    const streamTask = ChatApi.sendStream({
+      personaId: this.data.persona.id,
+      messages: messages
+        .filter(m => m.role !== 'assistant' || !m.streaming) // 不把占位符发给 LLM
+        .map(m => ({ role: m.role, content: m.content })),
+      model: this.data.modelKeys[this.data.currentModel],
+      onDelta: (content) => {
+        const updated = this.data.messages.map(m => {
+          if (m.id === aiPlaceholderId) {
+            return { ...m, content: m.content + content }
+          }
+          return m
+        })
+        this.setData({ messages: updated })
+        this.scrollToBottom()
+      },
+      onDone: () => {
+        const updated = this.data.messages.map(m => {
+          if (m.id === aiPlaceholderId) {
+            return { ...m, streaming: false, toolStatus: undefined }
+          }
+          return m
+        })
+        this.setData({ messages: updated, loading: false })
+      },
+      onToolStart: (toolName) => {
+        const labels = { calculator: '计算中...', current_time: '获取时间...', web_search: '搜索中...' }
+        const updated = this.data.messages.map(m => {
+          if (m.id === aiPlaceholderId) {
+            return { ...m, toolStatus: `🔧 ${labels[toolName] || toolName}` }
+          }
+          return m
+        })
+        this.setData({ messages: updated })
+      },
+      onToolEnd: () => {
+        const updated = this.data.messages.map(m => {
+          if (m.id === aiPlaceholderId) {
+            return { ...m, toolStatus: undefined }
+          }
+          return m
+        })
+        this.setData({ messages: updated })
+      },
+      onError: (err) => {
+        const msg = err.message || ''
+        if (msg.includes('API key')) {
+          wx.showToast({ title: '请先设置 API Key', icon: 'none' })
+        } else {
+          wx.showToast({ title: '发送失败: ' + msg.slice(0, 30), icon: 'none' })
+        }
+        // 保留已接收的部分内容
+        const updated = this.data.messages.map(m => {
+          if (m.id === aiPlaceholderId) {
+            return m.content ? { ...m, streaming: false } : null
+          }
+          return m
+        }).filter(Boolean)
+        this.setData({ messages: updated, loading: false })
+      },
+    })
 
-      const aiMsg = { role: 'assistant', content: res.reply, id: 'msg-' + (Date.now() + 1) }
-      this.setData({ messages: [...this.data.messages, aiMsg], loading: false })
-      this.scrollToBottom()
+    // 保存 streamTask 以便后续取消
+    this._streamTask = streamTask
+  },
+
+  // TECH-API-009 D10: 重新生成（分支）
+  async onRegenerate(e) {
+    const { recordId } = e.currentTarget.dataset
+    if (!recordId || this.data.loading) return
+
+    // 找到该消息在列表中的位置，移除该消息及之后的内容
+    const idx = this.data.messages.findIndex(m => String(m.recordId) === String(recordId))
+    if (idx < 0) return
+
+    // 保留该消息之前的内容，以及该消息对应的用户输入作为分支起点
+    const truncatedMessages = this.data.messages.slice(0, idx)
+    // 回溯找到上一个用户消息
+    const userMessages = truncatedMessages.filter(m => m.role === 'user')
+
+    const aiPlaceholderId = 'msg-' + (Date.now() + 1)
+    const aiPlaceholder = { role: 'assistant', content: '', id: aiPlaceholderId, streaming: true }
+    this.setData({
+      messages: [...truncatedMessages, aiPlaceholder],
+      loading: true,
+    })
+    this.scrollToBottom()
+
+    const streamTask = ChatApi.sendStream({
+      personaId: this.data.persona.id,
+      messages: userMessages.map(m => ({ role: m.role, content: m.content })),
+      model: this.data.modelKeys[this.data.currentModel],
+      parentRecordId: Number(recordId),
+      onDelta: (content) => {
+        const updated = this.data.messages.map(m => {
+          if (m.id === aiPlaceholderId) return { ...m, content: m.content + content }
+          return m
+        })
+        this.setData({ messages: updated })
+        this.scrollToBottom()
+      },
+      onDone: () => {
+        const updated = this.data.messages.map(m => {
+          if (m.id === aiPlaceholderId) return { ...m, streaming: false }
+          return m
+        })
+        this.setData({ messages: updated, loading: false })
+      },
+      onError: (err) => {
+        wx.showToast({ title: '重新生成失败', icon: 'none' })
+        const updated = this.data.messages.map(m => {
+          if (m.id === aiPlaceholderId) return m.content ? { ...m, streaming: false } : null
+          return m
+        }).filter(Boolean)
+        this.setData({ messages: updated, loading: false })
+      },
+    })
+  },
+
+  // TECH-API-010 D11: 消息评分
+  async onRate(e) {
+    const { recordId, rating } = e.currentTarget.dataset
+    if (!recordId) return
+
+    try {
+      await ChatApi.rateMessage(recordId, rating)
+      const updated = this.data.messages.map(m => {
+        if (String(m.recordId) === String(recordId)) {
+          return { ...m, userRating: rating }
+        }
+        return m
+      })
+      this.setData({ messages: updated })
+      wx.showToast({ title: rating === 'like' ? '已点赞' : '已点踩', icon: 'none', duration: 1000 })
     } catch (err) {
-      const msg = err.message || ''
-      if (msg.includes('API key')) {
-        wx.showToast({ title: '请先设置 API Key', icon: 'none' })
-      } else {
-        wx.showToast({ title: '发送失败: ' + msg.slice(0, 30), icon: 'none' })
-      }
-      this.setData({ loading: false })
+      wx.showToast({ title: '评分失败', icon: 'none' })
     }
   },
 

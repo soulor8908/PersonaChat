@@ -12,8 +12,10 @@ describe('chatMessageSchema', () => {
     expect(result.content).toBe('Hello')
   })
 
-  it('rejects empty content', () => {
-    expect(() => chatMessageSchema.parse({ role: 'user', content: '' })).toThrow()
+  it('allows null content (for tool_calls messages)', () => {
+    const result = chatMessageSchema.parse({ role: 'assistant', content: null })
+    expect(result.role).toBe('assistant')
+    expect(result.content).toBeNull()
   })
 
   it('rejects invalid role', () => {

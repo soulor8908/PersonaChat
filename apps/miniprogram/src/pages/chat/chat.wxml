@@ -28,8 +28,16 @@
       id="msg-{{item.id}}"
     >
       <view class="msg-avatar" wx:if="{{item.role === 'assistant'}}">{{persona.name[0]}}</view>
-      <view class="msg-content">
-        <text>{{item.content}}</text>
+      <view class="msg-body">
+        <view class="msg-content">
+          <text>{{item.content}}</text>
+        </view>
+        <!-- 分支按钮 + 评分：AI 消息且非流式中 -->
+        <view class="msg-actions" wx:if="{{item.role === 'assistant' && !item.streaming && item.content}}">
+          <view class="branch-btn" bindtap="onRegenerate" data-record-id="{{item.recordId}}">🔄</view>
+          <view class="rate-btn {{item.userRating === 'like' ? 'rated' : ''}}" bindtap="onRate" data-record-id="{{item.recordId}}" data-rating="like">👍</view>
+          <view class="rate-btn {{item.userRating === 'dislike' ? 'rated' : ''}}" bindtap="onRate" data-record-id="{{item.recordId}}" data-rating="dislike">👎</view>
+        </view>
       </view>
       <view class="msg-avatar" wx:if="{{item.role === 'user'}}">我</view>
     </view>

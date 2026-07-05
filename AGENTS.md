@@ -9,6 +9,10 @@
 ## 接到任务时的第一动作
 
 ```
+Step 0: ⛔ 编码前自查清单（以下任一不满足 → 拒绝编码，先补齐）
+  □ docs/prd/{feature}.md 存在且 AC 清单完整（正常/边界/错误三类）
+  □ docs/spec/{feature}.tech.md 存在且含 Dx 决策表
+  □ 上述两项不存在 → spawn BA + Tech Lead subagent 补全
 Step 1: 读 docs/context-snapshot.md（架构速查 + 规则速查表 + 路由表 + 契约速查）
 Step 2: 读 .trae/rules/ 下适用规则（至少把对应分类的规则扫一遍）
 Step 3: 读 docs/retro/lessons-learned.md（不重复已知错误）

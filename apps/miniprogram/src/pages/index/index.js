@@ -1,4 +1,4 @@
-// ── 人格库首页 ──
+// ── 人格库首页 (TECH-API-013 D14: 市场版) ──
 import { PersonaApi } from '../../api/client.js'
 
 const CATEGORY_LABELS = {
@@ -9,26 +9,43 @@ const CATEGORY_LABELS = {
   custom: '自定义',
 }
 
+const SORT_OPTIONS = [
+  { key: 'popular', label: '热门' },
+  { key: 'recent', label: '最新' },
+  { key: 'rated', label: '最多互动' },
+]
+
 Page({
   data: {
     personas: [],
+    hotPersonas: [],          // 热门推荐
     categories: [
       { key: '', label: '全部' },
       { key: 'tech_leader', label: '科技领袖' },
       { key: 'thinker', label: '思想家' },
       { key: 'educator', label: '教育者' },
     ],
+    sortOptions: SORT_OPTIONS,
     activeCategory: '',
+    activeSort: 'popular',
     searchText: '',
     loading: false,
   },
 
   onLoad() {
     this.loadPersonas()
+    this.loadHot()
   },
 
   onPullDownRefresh() {
-    this.loadPersonas().then(() => wx.stopPullDownRefresh())
+    Promise.all([this.loadPersonas(), this.loadHot()]).then(() => wx.stopPullDownRefresh())
+  },
+
+  async loadHot() {
+    try {
+      const res = await PersonaApi.listHot()
+      this.setData({ hotPersonas: res.data || [] })
+    } catch (_e) { void (_e as Error) }
   },
 
   async loadPersonas() {
@@ -37,10 +54,12 @@ Page({
       const res = await PersonaApi.list({
         category: this.data.activeCategory || undefined,
         search: this.data.searchText || undefined,
+        sort: this.data.activeSort,
       })
       const personas = (res.data || []).map((p) => ({
         ...p,
         categoryLabel: CATEGORY_LABELS[p.category] || p.category,
+        likePercent: Math.round((p.likeRate || 0) * 100),
       }))
       this.setData({ personas, loading: false })
     } catch (err) {
@@ -60,7 +79,16 @@ Page({
     this.loadPersonas()
   },
 
+  onSortTap(e) {
+    this.setData({ activeSort: e.currentTarget.dataset.key })
+    this.loadPersonas()
+  },
+
   onPersonaTap(e) {
     wx.navigateTo({ url: `/src/pages/chat/chat?personaId=${e.currentTarget.dataset.id}` })
+  },
+
+  onCreateTap() {
+    wx.navigateTo({ url: '/src/pages/create/create' })
   },
 })
