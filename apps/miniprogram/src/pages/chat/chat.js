@@ -38,11 +38,12 @@ Page({
     } catch (_) {
       console.warn('无法从 API 获取模型列表，使用本地默认')
     }
-    // 本地兜底
+    // 本地兜底（最小化：API 不可达时提示用户，不硬编码模型列表）
+    wx.showToast({ title: '无法加载模型列表', icon: 'none' })
     this.setData({
-      modelKeys: ['deepseek-v3', 'glm-4-flash'],
-      modelNames: ['DeepSeek V3', 'GLM-4-Flash'],
-      currentModelName: 'DeepSeek V3',
+      modelKeys: [],
+      modelNames: [],
+      currentModelName: '',
     })
   },
 

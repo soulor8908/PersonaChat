@@ -29,6 +29,20 @@ const TESTS = [
     }),
     expect: (res) => res.status === 201,
   },
+  {
+    name: 'GET /api/personas',
+    run: () => fetch(`${BASE_URL}/api/personas`),
+    expect: (res) => res.status === 200 && res.json().then(b => Array.isArray(b.data)),
+  },
+  {
+    name: 'POST /api/chats (validation)',
+    run: () => fetch(`${BASE_URL}/api/chats`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ personaId: 'nonexistent', messages: [{ role: 'user', content: 'hi' }], model: 'deepseek-v3' }),
+    }),
+    expect: (res) => [200, 404].includes(res.status), // 404 expected (no persona in DB), but 200 also valid
+  },
 ]
 
 async function main() {

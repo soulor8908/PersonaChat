@@ -20,4 +20,4 @@ severity: advisory
 
 ## 校验方式
 
-Reviewer 核对 `apps/api/src/router/*.ts` 与 `apps/miniprogram/src/api/client.js` 的端点一致性。
+[advisory] 前端代码为 .js 文件，非 TS 编译期校验。Reviewer 核对 `apps/api/src/router/*.ts` 与 `apps/miniprogram/src/api/client.js` 的端点一致性。

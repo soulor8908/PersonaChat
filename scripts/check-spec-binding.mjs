@@ -76,11 +76,17 @@ function extractTechRefsFromCode() {
           const cleanRefs = dRefs.map(r => r.replace(/[,;].*$/, '').trim())
 
           const key = `TECH-${module}-${seq}`
-          refs.set(key, {
-            file: relative(ROOT, file),
-            line: i + 1,
-            dRefs: cleanRefs,
-          })
+          // 累积同一 key 的多个 D 引用（不同文件/行可能有不同的 D 编号）
+          if (refs.has(key)) {
+            const existing = refs.get(key)
+            for (const ref of cleanRefs) {
+              if (!existing.dRefs.includes(ref)) {
+                existing.dRefs.push(ref)
+              }
+            }
+          } else {
+            refs.set(key, { file: relative(ROOT, file), line: i + 1, dRefs: cleanRefs })
+          }
         }
       }
     }
