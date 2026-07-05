@@ -57,4 +57,8 @@ export const ChatApi = {
   getModels() {
     return request('GET', '/api/models')
   },
+
+  deleteRecord(id) {
+    return request('DELETE', `/api/chats/${id}`)
+  },
 }
