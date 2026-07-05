@@ -13,6 +13,7 @@ import { PersonaService } from './service/persona-svc.js'
 import { ChatService } from './service/chat-svc.js'
 import { createPersonaRouter } from './router/persona.router.js'
 import { createChatRouter } from './router/chat.router.js'
+import { modelRegistry } from '@personachat/contracts'
 import type { D1Database } from '@cloudflare/workers-types'
 import type { Env } from './context.js'
 
@@ -59,7 +60,7 @@ async function ensureTables(db: D1Database): Promise<void> {
 }
 
 // ── App 工厂 ──
-function createApp(env: Env) {
+export function createApp(env: Env) {
   const app = new Hono<{ Bindings: Env }>()
 
   // 全局中间件
@@ -76,6 +77,16 @@ function createApp(env: Env) {
   // 健康检查
   app.get('/api/health', (c) => {
     return c.json({ ok: true, ts: Date.now() })
+  })
+
+  // 模型列表 (SSOT 下发，供前端动态获取)
+  app.get('/api/models', (c) => {
+    const models = modelRegistry.map(m => ({
+      id: m.id,
+      name: m.name,
+      free: m.free,
+    }))
+    return c.json({ ok: true, data: models })
   })
 
   // ── 依赖注入 ──

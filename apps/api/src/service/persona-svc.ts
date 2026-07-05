@@ -57,7 +57,8 @@ export class PersonaService {
 
     // 返回更新后的实体
     const updated = await this.repo.findById(id)
-    return updated!
+    if (!updated) throw Errors.internal('Persona disappeared after update')
+    return updated
   }
 
   async delete(id: string): Promise<void> {

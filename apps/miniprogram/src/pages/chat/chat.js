@@ -9,18 +9,41 @@ Page({
     inputText: '',
     loading: false,
     scrollToView: '',
-    modelKeys: ['deepseek-v3', 'glm-4-flash', 'gpt-4o-mini'],
-    modelNames: ['DeepSeek V3', 'GLM-4-Flash', 'GPT-4o Mini'],
+    modelKeys: [],
+    modelNames: [],
     currentModel: 0,
-    currentModelName: 'DeepSeek V3',
+    currentModelName: '',
     userId: '',
   },
 
   onLoad(options) {
     const app = getApp()
     this.setData({ userId: app.globalData.userId })
+    this.loadModels()
     this.loadPersona(options.personaId)
     this.loadHistory(options.personaId)
+  },
+
+  async loadModels() {
+    try {
+      const res = await ChatApi.getModels()
+      if (res.data?.length > 0) {
+        this.setData({
+          modelKeys: res.data.map(m => m.id),
+          modelNames: res.data.map(m => m.name),
+          currentModelName: res.data[0].name,
+        })
+        return
+      }
+    } catch (_) {
+      console.warn('无法从 API 获取模型列表，使用本地默认')
+    }
+    // 本地兜底
+    this.setData({
+      modelKeys: ['deepseek-v3', 'glm-4-flash'],
+      modelNames: ['DeepSeek V3', 'GLM-4-Flash'],
+      currentModelName: 'DeepSeek V3',
+    })
   },
 
   async loadPersona(id) {

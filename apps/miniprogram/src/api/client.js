@@ -53,4 +53,8 @@ export const ChatApi = {
     if (personaId) path += `&persona_id=${personaId}`
     return request('GET', path)
   },
+
+  getModels() {
+    return request('GET', '/api/models')
+  },
 }

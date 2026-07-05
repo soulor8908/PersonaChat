@@ -65,10 +65,8 @@ export class ChatService {
       throw err
     }
 
-    // 5. 异步保存记录（不阻塞响应）
-    this.chatRepo
-      .save('anonymous', personaId, messages, result.reply, model)
-      .catch(err => console.error('Failed to save chat record:', err))
+    // 5. 异步保存记录（最多重试 2 次）
+    this.saveRecordAsync('anonymous', personaId, messages, result.reply, model)
 
     return { reply: result.reply, model }
   }
@@ -80,5 +78,25 @@ export class ChatService {
     offset = 0,
   ): Promise<ChatRecord[]> {
     return this.chatRepo.findByUserId(userId, personaId, limit, offset)
+  }
+
+  // 异步保存聊天记录，最多重试 2 次
+  private saveRecordAsync(
+    userId: string,
+    personaId: string,
+    messages: ChatMessage[],
+    reply: string,
+    model: string,
+    retries = 2,
+  ): void {
+    this.chatRepo.save(userId, personaId, messages, reply, model)
+      .catch(err => {
+        if (retries > 0) {
+          console.warn(`Failed to save chat record (retries left: ${retries}):`, err)
+          this.saveRecordAsync(userId, personaId, messages, reply, model, retries - 1)
+        } else {
+          console.error('Failed to save chat record after retries:', err)
+        }
+      })
   }
 }

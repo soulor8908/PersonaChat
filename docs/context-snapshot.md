@@ -1,5 +1,5 @@
 # PersonaChat 项目上下文快照
-> 生成日期: 2026-07-04 | 最近轮次: Round 1
+> 生成日期: 2026-07-05 | 最近轮次: Round 1
 
 ## 项目概览
 
@@ -13,11 +13,11 @@
 | - security | 3 |
 | 契约 Schema | 5 个 |
 | API 路由 | 9 条 |
-| API 源文件 | 13 个 |
-| Spec 文档 | 0 个 |
-| E2E 测试 | 0 个 |
+| API 源文件 | 15 个 |
+| Spec 文档 | 1 个 |
+| E2E 测试 | 2 个 |
 | CI | 已配置 |
-| 文档 | 9 个 |
+| 文档 | 13 个 |
 
 ## 架构速查
 
@@ -84,7 +84,7 @@ packages/contracts/  ← Zod SSOT 契约层 (前后端共享)
 
 ### schemas\common.ts
 - Schemas: errorCodeSchema, apiResponseSchema, paginationSchema, builtinModelIdSchema, modelConfigSchema, personaCategorySchema
-- Types: ErrorCode, Pagination, ModelConfig, PersonaCategory
+- Types: ErrorCode, Pagination, ModelRegistryEntry, BuiltinModelId, ModelConfig, PersonaCategory
 
 ### schemas\persona.ts
 - Schemas: personaSchema, personaCreateSchema, personaUpdateSchema, personaQuerySchema, personaSourceSchema
@@ -109,7 +109,11 @@ packages/contracts/  ← Zod SSOT 契约层 (前后端共享)
 - [docs/deploy-guide.md](docs/deploy-guide.md)
 - [docs/prd/R1-monorepo-refactor.md](docs/prd/R1-monorepo-refactor.md)
 - [docs/prd/R2-persona-domain-complete.md](docs/prd/R2-persona-domain-complete.md)
+- [docs/project-review.md](docs/project-review.md)
 - [docs/retro/lessons-learned.md](docs/retro/lessons-learned.md)
 - [docs/retro/round-1.md](docs/retro/round-1.md)
 - [docs/round-2-delta.md](docs/round-2-delta.md)
+- [docs/spec/persona-crud.tech.md](docs/spec/persona-crud.tech.md)
+- [docs/test-design.md](docs/test-design.md)
+- [docs/test-plan.md](docs/test-plan.md)
 - [docs/workflow/spec-first-workflow.md](docs/workflow/spec-first-workflow.md)
