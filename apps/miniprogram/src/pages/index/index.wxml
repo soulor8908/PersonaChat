@@ -1,4 +1,4 @@
-<!-- 人格库首页 -->
+<!-- 人格库首页 (TECH-API-013 D14: 市场版) -->
 <view class="container">
   <!-- 搜索栏 -->
   <view class="search-bar">
@@ -8,6 +8,27 @@
       value="{{searchText}}"
       bindinput="onSearchInput"
     />
+  </view>
+
+  <!-- 创建入口 -->
+  <view class="create-entry" bindtap="onCreateTap">＋ 创建人格</view>
+
+  <!-- 热门推荐 -->
+  <view class="hot-section" wx:if="{{hotPersonas.length > 0}}">
+    <view class="section-title">🔥 热门推荐</view>
+    <scroll-view class="hot-scroll" scroll-x>
+      <view
+        class="hot-card"
+        wx:for="{{hotPersonas}}"
+        wx:key="id"
+        bindtap="onPersonaTap"
+        data-id="{{item.id}}"
+      >
+        <view class="hot-avatar">{{item.name[0]}}</view>
+        <view class="hot-name">{{item.name}}</view>
+        <view class="hot-meta">{{item.messageCount}} 对话 · {{Math.round(item.likeRate * 100)}}% 好评</view>
+      </view>
+    </scroll-view>
   </view>
 
   <!-- 分类标签 -->
@@ -22,6 +43,17 @@
       {{item.label}}
     </view>
   </scroll-view>
+
+  <!-- 排序 -->
+  <view class="sort-bar">
+    <view
+      class="sort-btn {{activeSort === item.key ? 'active' : ''}}"
+      wx:for="{{sortOptions}}"
+      wx:key="key"
+      bindtap="onSortTap"
+      data-key="{{item.key}}"
+    >{{item.label}}</view>
+  </view>
 
   <!-- 人格列表 -->
   <view class="persona-list">
@@ -38,19 +70,26 @@
         <view class="persona-desc">{{item.description}}</view>
         <view class="persona-meta">
           <text class="persona-category">{{item.categoryLabel}}</text>
-          <text class="persona-stars" wx:if="{{item.stargazers_count > 0}}">
-            ⭐ {{item.stargazers_count}}
-          </text>
+          <text class="persona-stars" wx:if="{{item.stargazers_count > 0}}">⭐ {{item.stargazers_count}}</text>
+        </view>
+        <view class="persona-stats">
+          <text>💬 {{item.messageCount}}</text>
+          <text>👍 {{Math.round(item.likeRate * 100)}}%</text>
+          <text wx:if="{{item.tools && item.tools.length > 0}}">🔧 {{item.tools.length}} 工具</text>
         </view>
       </view>
     </view>
   </view>
 
   <!-- 空状态 -->
-  <view class="empty" wx:if="{{personas.length === 0 && !loading}}">
-    暂无数据
+  <view class="empty-state" wx:if="{{personas.length === 0 && !loading}}">
+    <view class="empty-icon">🔍</view>
+    <view>暂无数据</view>
   </view>
 
-  <!-- 加载中 -->
-  <view class="loading" wx:if="{{loading}}">加载中...</view>
+  <!-- 骨架屏 -->
+  <view class="loading-skeleton" wx:if="{{loading && personas.length === 0}}">
+    <view class="skeleton-spinner"></view>
+    <text class="skeleton-text">加载中...</text>
+  </view>
 </view>

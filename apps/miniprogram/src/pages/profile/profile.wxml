@@ -2,6 +2,16 @@
 <view class="container">
   <view class="section-title">设置</view>
 
+  <!-- API Key 配置 -->
+  <view class="section">
+    <view class="section-header">🔑 API Key</view>
+    <view class="form-item">
+      <input class="form-input" placeholder="输入 API Key (x-api-key)" value="{{apiKey}}" bindinput="onApiKeyInput" password />
+    </view>
+    <view class="save-btn" bindtap="onSaveApiKey">{{saved ? '已保存 ✓' : '保存'}}</view>
+    <view class="form-hint">用于访问 PersonaChat API 的认证密钥</view>
+  </view>
+
   <!-- 模型配置 -->
   <view class="section">
     <view class="section-header">🤖 模型配置</view>

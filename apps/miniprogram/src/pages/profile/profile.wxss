@@ -100,6 +100,23 @@
   margin-top: 20rpx;
 }
 
+/* API Key */
+.save-btn {
+  display: inline-block;
+  padding: 12rpx 40rpx;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff;
+  border-radius: 12rpx;
+  font-size: 26rpx;
+  margin-top: 12rpx;
+}
+
+.form-hint {
+  font-size: 22rpx;
+  color: #999;
+  margin-top: 12rpx;
+}
+
 .about-text {
   font-size: 26rpx;
   color: #666;

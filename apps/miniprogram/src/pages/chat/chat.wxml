@@ -31,6 +31,7 @@
       <view class="msg-body">
         <view class="msg-content">
           <text>{{item.content}}</text>
+          <view class="msg-tool-status" wx:if="{{item.toolStatus}}">{{item.toolStatus}}</view>
         </view>
         <!-- 分支按钮 + 评分：AI 消息且非流式中 -->
         <view class="msg-actions" wx:if="{{item.role === 'assistant' && !item.streaming && item.content}}">
@@ -62,6 +63,7 @@
       bindconfirm="onSend"
       confirm-type="send"
     />
-    <view class="send-btn {{inputText ? 'active' : ''}}" bindtap="onSend">发送</view>
+    <view class="send-btn {{inputText ? 'active' : ''}}" wx:if="{{!loading}}" bindtap="onSend">发送</view>
+    <view class="send-btn stop-btn" wx:if="{{loading}}" bindtap="onStop">停止</view>
   </view>
 </view>

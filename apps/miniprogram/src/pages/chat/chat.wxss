@@ -160,3 +160,13 @@
 .send-btn.active {
   background: linear-gradient(135deg, #667eea, #764ba2);
 }
+
+.stop-btn {
+  background: #ff6b6b;
+}
+
+.msg-tool-status {
+  font-size: 22rpx;
+  color: #f0ad4e;
+  margin-top: 8rpx;
+}

@@ -5,11 +5,15 @@ const BASE_URL = 'https://persona-chat-api.470033918.workers.dev'  // 生产环�
 
 async function request(method, path, data = null) {
   return new Promise((resolve, reject) => {
+    const header = { 'Content-Type': 'application/json' }
+    // 附加 API Key（如果有）
+    const apiKey = wx.getStorageSync('api_key')
+    if (apiKey) header['x-api-key'] = apiKey
     wx.request({
       url: `${BASE_URL}${path}`,
       method,
       data,
-      header: { 'Content-Type': 'application/json' },
+      header,
       success: (res) => {
         if (res.statusCode >= 400) {
           reject(new Error(res.data?.error || `HTTP ${res.statusCode}`))
@@ -68,7 +72,12 @@ export const ChatApi = {
       url: `${BASE_URL}/api/chats/stream`,
       method: 'POST',
       data: { personaId, messages, model, apiKey, parentRecordId },
-      header: { 'Content-Type': 'application/json' },
+      header: (() => {
+        const h = { 'Content-Type': 'application/json' }
+        const apiKey = wx.getStorageSync('api_key')
+        if (apiKey) h['x-api-key'] = apiKey
+        return h
+      })(),
       enableChunked: true,
       success: () => {}, // 由 onChunkReceived 处理
       fail: (err) => {

@@ -43,7 +43,8 @@ Page({
       newChats.forEach((chat) => {
         const key = chat.personaId
         if (!groups[key]) {
-          groups[key] = { personaId: key, personaName: key, count: 0, chats: [] }
+          // R11-D6: personaName || personaId 降级 (TECH-API-003 D4)
+          groups[key] = { personaId: key, personaName: chat.personaName || key, count: 0, chats: [] }
         }
         groups[key].count++
         groups[key].chats.push({

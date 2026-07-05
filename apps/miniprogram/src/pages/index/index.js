@@ -41,6 +41,7 @@ Page({
     Promise.all([this.loadPersonas(), this.loadHot()]).then(() => wx.stopPullDownRefresh())
   },
 
+  // R11-D1: 热门推荐 — wx:if 守卫提升性能
   async loadHot() {
     try {
       const res = await PersonaApi.listHot()
@@ -79,6 +80,7 @@ Page({
     this.loadPersonas()
   },
 
+  // R11-D2: 排序 — 活动态高亮
   onSortTap(e) {
     this.setData({ activeSort: e.currentTarget.dataset.key })
     this.loadPersonas()
@@ -88,6 +90,7 @@ Page({
     wx.navigateTo({ url: `/src/pages/chat/chat?personaId=${e.currentTarget.dataset.id}` })
   },
 
+  // R11-D1: 创建入口 — 全宽渐变按钮
   onCreateTap() {
     wx.navigateTo({ url: '/src/pages/create/create' })
   },

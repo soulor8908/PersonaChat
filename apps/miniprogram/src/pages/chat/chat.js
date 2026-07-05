@@ -172,6 +172,22 @@ Page({
     this._streamTask = streamTask
   },
 
+  // R11-D3: 停止生成 — 条件渲染互斥发送/停止按钮 (TECH-API-008 D9)
+  onStop() {
+    try {
+      if (this._streamTask && this._streamTask.abort) {
+        this._streamTask.abort()
+      }
+    } catch (_e) { /* abort 失败时静默继续清理 */ }
+    // 移除流式中的占位消息
+    const updated = this.data.messages.map(m => {
+      if (m.streaming) return m.content ? { ...m, streaming: false } : null
+      return m
+    }).filter(Boolean)
+    this.setData({ messages: updated, loading: false })
+    this._streamTask = null
+  },
+
   // TECH-API-009 D10: 重新生成（分支）
   async onRegenerate(e) {
     const { recordId } = e.currentTarget.dataset

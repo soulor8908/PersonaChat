@@ -3,6 +3,8 @@ import { Storage } from '../../lib/storage.js'
 
 Page({
   data: {
+    apiKey: '',
+    saved: false,
     builtinModels: [
       { id: 'deepseek-v3', name: 'DeepSeek V3', free: true },
       { id: 'glm-4-flash', name: 'GLM-4-Flash', free: true },
@@ -14,7 +16,21 @@ Page({
   },
 
   onLoad() {
-    this.setData({ customModels: Storage.getModels() })
+    this.setData({ customModels: Storage.getModels(), apiKey: wx.getStorageSync('api_key') || '' })
+  },
+
+  onApiKeyInput(e) {
+    this.setData({ apiKey: e.detail.value })
+  },
+
+  // R11-D4: API Key — wx.setStorageSync 持久化 (TECH-API-006 D8)
+  onSaveApiKey() {
+    try {
+      wx.setStorageSync('api_key', this.data.apiKey)
+      this.setData({ saved: true })
+      setTimeout(() => this.setData({ saved: false }), 2000)
+      wx.showToast({ title: '已保存', icon: 'success' })
+    } catch (_e) { wx.showToast({ title: '保存失败', icon: 'none' }) }
   },
 
   onAddModelTap() {
