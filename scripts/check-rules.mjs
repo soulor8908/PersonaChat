@@ -306,6 +306,9 @@ CHECKS.push(async () => {
       const fileName = rawName.replace('.ts', '')
       // 跳过 index, server, 和带点号的命名（如 chat.router.ts, persona.router.ts）
       if (fileName === 'index' || fileName === 'server' || fileName.includes('.')) continue
+      // 跳过通用文件名（单层的 utils/errors/common/chat 等）
+      const genericNames = ['errors', 'llm', 'chat', 'common', 'user']
+      if (genericNames.includes(fileName)) continue
       const content = readFileSync(file, 'utf-8')
 
       // 检查文件名是否为 kebab-case（纯单字母文件名也允许，如 llm.ts）

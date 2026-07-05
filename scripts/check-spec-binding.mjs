@@ -67,7 +67,7 @@ function extractTechRefsFromCode() {
         // // TECH-API-001 D1
         // // TECH-CONTRACT-002 D1,D3
         // /* TECH-API-001 D1 */
-        const match = lines[i].match(/TECH-(\w+)-(\d+)\s+(D\d[\d,]*)(?::|\s|$)/)
+        const match = lines[i].match(/TECH-(\w+)-(\d+)\s+(D\d[\d,]*)(?::|：|\s|$)/)
         if (match) {
           const module = match[1]
           const seq = match[2]

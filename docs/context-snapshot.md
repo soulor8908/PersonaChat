@@ -1,5 +1,5 @@
 # PersonaChat 项目上下文快照
-> 生成日期: 2026-07-05 | 最近轮次: Round 1
+> 生成日期: 2026-07-05 | 最近轮次: Round 6
 
 ## 项目概览
 
@@ -17,7 +17,7 @@
 | Spec 文档 | 1 个 |
 | E2E 测试 | 2 个 |
 | CI | 已配置 |
-| 文档 | 14 个 |
+| 文档 | 20 个 |
 
 ## 架构速查
 
@@ -107,11 +107,17 @@ packages/contracts/  ← Zod SSOT 契约层 (前后端共享)
 - [docs/ai-native-transformation-plan.md](docs/ai-native-transformation-plan.md)
 - [docs/context-snapshot.md](docs/context-snapshot.md)
 - [docs/deploy-guide.md](docs/deploy-guide.md)
+- [docs/final-review.md](docs/final-review.md)
 - [docs/prd/R1-monorepo-refactor.md](docs/prd/R1-monorepo-refactor.md)
 - [docs/prd/R2-persona-domain-complete.md](docs/prd/R2-persona-domain-complete.md)
 - [docs/project-review.md](docs/project-review.md)
 - [docs/retro/lessons-learned.md](docs/retro/lessons-learned.md)
 - [docs/retro/round-1.md](docs/retro/round-1.md)
+- [docs/retro/round-2.md](docs/retro/round-2.md)
+- [docs/retro/round-3.md](docs/retro/round-3.md)
+- [docs/retro/round-4.md](docs/retro/round-4.md)
+- [docs/retro/round-5.md](docs/retro/round-5.md)
+- [docs/retro/round-6.md](docs/retro/round-6.md)
 - [docs/round-2-delta.md](docs/round-2-delta.md)
 - [docs/round-3-delta.md](docs/round-3-delta.md)
 - [docs/spec/persona-crud.tech.md](docs/spec/persona-crud.tech.md)

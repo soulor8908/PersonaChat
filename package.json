@@ -17,6 +17,7 @@
     "delta": "node scripts/gen-round-delta.mjs",
     "retro": "node scripts/gen-retro-index.mjs",
     "release": "node scripts/deploy.mjs",
+    "smoke": "node scripts/smoke-test.mjs",
     "seed": "node scripts/seed.mjs"
   },
   "devDependencies": {
