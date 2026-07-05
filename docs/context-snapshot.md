@@ -17,7 +17,7 @@
 | Spec 文档 | 1 个 |
 | E2E 测试 | 2 个 |
 | CI | 已配置 |
-| 文档 | 13 个 |
+| 文档 | 14 个 |
 
 ## 架构速查
 
@@ -113,6 +113,7 @@ packages/contracts/  ← Zod SSOT 契约层 (前后端共享)
 - [docs/retro/lessons-learned.md](docs/retro/lessons-learned.md)
 - [docs/retro/round-1.md](docs/retro/round-1.md)
 - [docs/round-2-delta.md](docs/round-2-delta.md)
+- [docs/round-3-delta.md](docs/round-3-delta.md)
 - [docs/spec/persona-crud.tech.md](docs/spec/persona-crud.tech.md)
 - [docs/test-design.md](docs/test-design.md)
 - [docs/test-plan.md](docs/test-plan.md)

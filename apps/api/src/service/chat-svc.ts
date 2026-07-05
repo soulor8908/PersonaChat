@@ -80,6 +80,13 @@ export class ChatService {
     return this.chatRepo.findByUserId(userId, personaId, limit, offset)
   }
 
+  // TECH-API-006 D8: 删除聊天记录 — 先查存在性再原子删除
+  async deleteRecord(id: string): Promise<void> {
+    const record = await this.chatRepo.findById(id)
+    if (!record) throw Errors.notFound('Chat record')
+    await this.chatRepo.deleteById(id)
+  }
+
   // 异步保存聊天记录，最多重试 2 次
   private saveRecordAsync(
     userId: string,

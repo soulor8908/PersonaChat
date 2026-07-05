@@ -1,16 +1,26 @@
 name = "persona-chat-api"
 main = "src/server.ts"
-compatibility_date = "2024-01-01"
+compatibility_date = "2025-01-01"
 
-[env.production]
-name = "persona-chat-api"
-
-# D1 Database
+# ── D1 Database ──
 [[d1_databases]]
 binding = "DB"
 database_name = "persona-chat-db"
-database_id = "fc79067a-1948-41ef-903b-5a39ee997696"  # 部署时创建
+database_id = "fc79067a-1948-41ef-903b-5a39ee997696"
 
-# 环境变量
+# ── 生产环境 ──
+[env.production]
+name = "persona-chat-api"
+
+# ── 环境变量 ──
 [vars]
 ENVIRONMENT = "development"
+
+# ── 生产环境变量（通过 wrangler secret 配置，不在此文件存储）──
+# wrangler secret put DEEPSEEK_API_KEY
+# wrangler secret put GLM_API_KEY
+# wrangler secret put OPENAI_API_KEY
+# wrangler secret put API_KEY
+# wrangler secret put ALLOWED_ORIGINS
+
+# ── 安全：wrangler.toml 不应包含 secrets，提交到 git 前确认无敏感信息 ──

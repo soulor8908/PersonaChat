@@ -43,6 +43,16 @@ export class ChatRepository {
       .run()
   }
 
+  // TECH-API-006 D8: delete/findById 独立原子操作
+  async findById(id: string): Promise<ChatRecord | null> {
+    const row = await this.db.prepare('SELECT * FROM chat_records WHERE id = ?').bind(id).first()
+    return row ? this.toRecord(row) : null
+  }
+
+  async deleteById(id: string): Promise<void> {
+    await this.db.prepare('DELETE FROM chat_records WHERE id = ?').bind(id).run()
+  }
+
   private toRecord(row: Record<string, unknown>): ChatRecord {
     return {
       id: row.id as string | undefined,
