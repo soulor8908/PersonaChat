@@ -150,3 +150,15 @@
 | CSS 变量 IE11 不支持 | 极低 | 目标 Chrome 90+ / Safari 14+ |
 | jsdom 无原生 scrollTo | 低 | setup.ts mock (D-2 Spec 偏离) |
 | tailwind.config.d.ts 类型补全 | 极低 | 为 import 提供类型，不影响运行时 (D-1 Spec 偏离) |
+
+---
+
+## 八、审计回溯注记 (2026-07-06)
+
+> **触发**：2026-07-06 文档完整性审计发现 R12 实现期产生 3 项 Spec 偏离（D-1/D-2/D-3），需在 Spec-First 流程下补齐回溯文档。
+>
+> **回溯 Spec**：详见 [backrefactor-r12-impl-deviations.md](backrefactor-r12-impl-deviations.md) — 记录 3 项偏离的 Spec 原文、实现选择、理由、拒绝方案、影响评估、回滚方案。
+>
+> **本注记作用**：将本 Tech-Spec 纳入工作树 diff，使 AI-003 越界检测可读取本文件第四节 "变更清单" 表格中声明的全部 R12 源码文件（含 5 个 pages/*.tsx + 8 个 components + 4 个配置/测试文件），与 [backrefactor-r12-impl-deviations.md](backrefactor-r12-impl-deviations.md) 的偏离变更清单共同构成完整 Spec-First 合规闭环。
+>
+> **门禁状态**：G0 AI-001/002/003/007 ✅ | G3 Tech-Spec ✅ | G3.5 Spec-Binding ✅ | G5 trinity ✅

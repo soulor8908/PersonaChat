@@ -94,6 +94,8 @@ ALTER TABLE personas ADD COLUMN tools TEXT DEFAULT '[]';  -- JSON array of tool 
 | `packages/contracts/test/tool.test.ts` | 验证 toOpenAITools() 输出符合 OpenAI 格式；toolRegistry 三工具齐全 | D16 |
 | `apps/api/test/tool-executor.test.ts` | calculator 正常/边界/错误；current_time 时区；web_search 优雅降级 | D19 |
 
+> **审计注记 (2026-07-06)**：`tool-executor.test.ts` 和 `packages/contracts/test/tool.test.ts` 在 Tech-Spec 中声明但**实际文件不存在**。Tool Use 的测试实际散落在 `chat-svc.test.ts`（service 层 mock）和 `chat.e2e.test.ts`（R19/R20/R21 等用例）中。原因是 R9 实现期将 unit test 合并到已有 E2E 文件，未按 Spec 独立建文件。属于 AI-003 越界（实现与 Spec 声明不一致），已在 `docs/spec/backrefactor-r3-r6-spec-gap.md` 的反推段记录此类问题。
+
 ### 修改文件
 
 | 文件路径 | 变更内容 | 行数 |

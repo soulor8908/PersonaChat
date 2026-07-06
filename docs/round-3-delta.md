@@ -3,7 +3,10 @@
 
 ## 本轮目标
 
-（待填写本轮要实现的功能或要解决的问题）
+1. **Persona CRUD 接口补齐** — POST/PUT/DELETE 路由 + Zod 入口校验（复用 R2 PRD AC，Tech-Spec 由 `docs/spec/persona-crud.tech.md` D1-D8 覆盖）
+2. **修复 R2 遗留质量问题** — `MODEL_REGISTRY` 硬编码（AI-005 违规）/ 3 处 `as any`（CODE-001 违规）/ `Math.random()` ID 生成（SEC 精神违规）
+3. **引入 Superpowers TDD 雏形** — 测试先行（红→绿）流程
+4. **引入 Spec-Binding 注释雏形** — `D#:` 注释格式（R4 修正 regex 中文兼容性）
 
 ## 本轮约束
 
@@ -20,12 +23,20 @@
 
 | 文件 | 操作 | 说明 |
 |------|------|------|
-| - | - | - |
+| `packages/contracts/src/schemas/persona.ts` | 修改 | personaCreateSchema / personaUpdateSchema / personaIdSchema (D1/D2/D3/D7) |
+| `apps/api/src/repository/persona-repo.ts` | 修改 | create/update/delete 方法 + 参数化 SQL (D4/D5/D8) |
+| `apps/api/src/service/persona-svc.ts` | 修改 | 编排层 Zod parse → repo → 错误码映射 (D6) |
+| `apps/api/src/router/persona.router.ts` | 修改 | POST/PUT/DELETE 路由 + 入口校验 (D7) |
+| `apps/api/src/domain/llm.ts` | 修改 | 修复 MODEL_REGISTRY/as any/Math.random (AI-005/CODE-001/SEC) |
+| `apps/api/test/persona.e2e.test.ts` | 修改 | 新增 13 个 CRUD E2E 用例 (P1-P12) |
+| `apps/api/test/persona-parser.test.ts` | 修改 | 新增 9 个 parser 边界用例 |
+| `apps/api/test/chat-svc.test.ts` | 新增 | chat service 单元测试 (mock D1 + callLLM) |
 
 ## 最近提交
 
-- e6a5e60 @ feat: Phase A-D 优化完成 — 测试补齐 + Spec-Binding + 前端SSOT + 生产加固
-- 6b96f84 @ feat: AI Native 改造完成 — PersonaChat v2.0
+> R2/R3 早期提交已合入后续主干；当前仓库可见提交均为回溯补齐的文档提交。
+- ee152ce docs: 补齐 R1-R10 历史文档缺口 + 更新 context-snapshot 到 R12
+- e3d4114 docs: PRD G1 合规修正 + 文档索引 + context-snapshot 更新
 
 ## 快速链接
 

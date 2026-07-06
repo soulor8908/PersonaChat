@@ -1,3 +1,4 @@
+// TECH-WEB-005 D44 — Chat 输入区色调 token 替换硬编码
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { PersonaApi, ChatApi, sendStream } from '../api/client'
@@ -31,8 +32,10 @@ export function ChatPage() {
         .then(r => {
           const msgs: Message[] = []
           ;(r.data || []).reverse().forEach((rec: Record<string, unknown>) => {
-            const raw = typeof rec.messages === 'string' ? JSON.parse(rec.messages as string) : rec.messages as Array<{ role: string; content: string }>
-            msgs.push(...(raw || []))
+            const raw: Array<{ role: string; content: string }> = typeof rec.messages === 'string'
+              ? JSON.parse(rec.messages as string)
+              : (rec.messages as Array<{ role: string; content: string }>) || []
+            msgs.push(...raw.map(m => ({ id: 'h-' + rec.id, role: m.role as Message['role'], content: m.content })))
             msgs.push({ id: 'h-' + rec.id, role: 'assistant', content: rec.reply as string, recordId: String(rec.id) })
           })
           setMessages(msgs.slice(-50))
@@ -98,31 +101,31 @@ export function ChatPage() {
   return (
     <div className="flex h-full flex-col">
       {/* Header */}
-      <div className="flex flex-shrink-0 items-center gap-2 border-b border-surface-700 bg-surface-800 p-3">
-        <button onClick={() => navigate(-1)} className="text-lg text-slate-400">←</button>
-        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-500 text-sm font-bold">{String(persona.name || '?')[0]}</div>
+      <div className="flex flex-shrink-0 items-center gap-2 border-b border-surface-200 bg-surface-50 p-3 dark:border-surface-700 dark:bg-surface-900">
+        <button onClick={() => navigate(-1)} className="text-lg text-surface-400">←</button>
+        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-500 text-sm font-bold text-white">{String(persona.name || '?')[0]}</div>
         <div className="min-w-0 flex-1">
           <div className="truncate text-sm font-medium">{persona.name as string}</div>
         </div>
-        <select value={model} onChange={e => setModel(e.target.value)} className="border-surface-600 rounded border bg-surface-700 px-2 py-1 text-xs text-slate-300">
+        <select value={model} onChange={e => setModel(e.target.value)} className="rounded border border-surface-300 bg-surface-100 px-2 py-1 text-xs text-surface-700 dark:border-surface-600 dark:bg-surface-800 dark:text-surface-300">
           {models.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
         </select>
       </div>
 
       {/* Messages */}
       <div ref={scrollRef} className="flex flex-1 flex-col gap-3 overflow-y-auto p-3">
-        {messages.length === 0 && <div className="py-10 text-center text-slate-500">开始对话吧</div>}
+        {messages.length === 0 && <div className="py-10 text-center text-surface-500">开始对话吧</div>}
         {messages.map(m => (
           <div key={m.id} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[80%] rounded-2xl px-3.5 py-2.5 ${m.role === 'user' ? 'bg-primary-500 text-white' : 'border border-surface-700 bg-surface-800 text-slate-200'}`}>
+            <div className={`max-w-[80%] rounded-2xl px-3.5 py-2.5 ${m.role === 'user' ? 'bg-primary-500 text-white' : 'border border-surface-200 bg-surface-100 text-surface-800 dark:border-surface-700 dark:bg-surface-800 dark:text-surface-200'}`}>
               <div className="whitespace-pre-wrap break-words text-sm">{m.content || (m.streaming ? '...' : '')}</div>
               {m.toolStatus && <div className="mt-1 text-xs text-semantic-warning">{m.toolStatus}</div>}
               {m.role === 'assistant' && !m.streaming && m.recordId && (
-                <div className="mt-1.5 flex gap-1 border-t border-surface-700 pt-1">
+                <div className="mt-1.5 flex gap-1 border-t border-surface-200 pt-1 dark:border-surface-700">
                   <button onClick={() => rateMessage(m.recordId!, m.userRating === 'like' ? 'dislike' : 'like')}
-                    className={`px-1.5 text-xs ${m.userRating === 'like' ? 'text-primary-400' : 'text-slate-500 hover:text-slate-300'}`}>👍</button>
+                    className={`px-1.5 text-xs ${m.userRating === 'like' ? 'text-primary-400' : 'text-surface-500 hover:text-surface-300'}`}>👍</button>
                   <button onClick={() => rateMessage(m.recordId!, m.userRating === 'dislike' ? 'like' : 'dislike')}
-                    className={`px-1.5 text-xs ${m.userRating === 'dislike' ? 'text-semantic-danger' : 'text-slate-500 hover:text-slate-300'}`}>👎</button>
+                    className={`px-1.5 text-xs ${m.userRating === 'dislike' ? 'text-semantic-danger' : 'text-surface-500 hover:text-surface-300'}`}>👎</button>
                 </div>
               )}
             </div>
@@ -131,17 +134,17 @@ export function ChatPage() {
       </div>
 
       {/* Input */}
-      <div className="flex-shrink-0 border-t border-surface-700 bg-surface-800 p-3">
+      <div className="flex-shrink-0 border-t border-surface-200 bg-surface-50 p-3 dark:border-surface-700 dark:bg-surface-900">
         <div className="flex gap-2">
           <input value={input} onChange={e => setInput(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() } }}
-            className="border-surface-600 flex-1 rounded-lg border bg-surface-700 px-3 py-2 text-sm text-white placeholder-slate-400 outline-none focus:border-primary-500"
+            className="flex-1 rounded-lg border border-surface-300 bg-surface-100 px-3 py-2 text-sm text-surface-900 placeholder-surface-400 outline-none focus:border-primary-500 dark:border-surface-600 dark:bg-surface-800 dark:text-surface-100"
             placeholder="输入消息... (Enter 发送)" disabled={loading}
           />
           {loading ? (
-            <button onClick={stop} className="rounded-lg bg-semantic-danger px-4 py-2 text-sm font-medium text-white">停止</button>
+            <button onClick={stop} className="rounded-lg bg-semantic-danger px-4 py-2 text-sm font-medium text-white hover:opacity-80">停止</button>
           ) : (
-            <button onClick={send} disabled={!input.trim()} className="rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white disabled:opacity-40">发送</button>
+            <button onClick={send} disabled={!input.trim()} className="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700 disabled:opacity-40">发送</button>
           )}
         </div>
       </div>

@@ -1,15 +1,78 @@
+/* TECH-WEB-010 D49 — CSS 变量驱动双主题 */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* 滚动条样式 */
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-thumb { background: #475569; border-radius: 2px; }
+/* ── 亮色主题变量 ── */
+:root {
+  --color-bg: #f8fafc;
+  --color-fg: #0f172a;
+  --color-primary: #6366f1;
+  --color-primary-fg: #ffffff;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f1f5f9;
+  --color-border: #e2e8f0;
+  --color-text-muted: #64748b;
+  --color-text-subtle: #94a3b8;
+  --color-danger: #f87171;
+  --color-warning: #facc15;
+  --color-success: #4ade80;
+}
 
-/* 安全区域 — Layout nav 已处理 pb-[env(safe-area-inset-bottom)] */
-/* 键盘导航无障碍 */
+/* ── 暗色主题变量 ── */
+.dark {
+  --color-bg: #0f172a;
+  --color-fg: #f1f5f9;
+  --color-primary: #818cf8;
+  --color-primary-fg: #ffffff;
+  --color-surface: #1e293b;
+  --color-surface-muted: #334155;
+  --color-border: #334155;
+  --color-text-muted: #94a3b8;
+  --color-text-subtle: #64748b;
+  --color-danger: #f87171;
+  --color-warning: #facc15;
+  --color-success: #4ade80;
+}
+
+@layer base {
+  body {
+    @apply bg-surface-50 text-surface-900 dark:bg-surface-900 dark:text-surface-100 antialiased;
+  }
+}
+
+/* ── 滚动条样式 ── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 2px; }
+
+/* ── 安全区域 — Layout nav 已处理 pb-[env(safe-area-inset-bottom)] ── */
+/* ── 键盘导航无障碍 ── */
 *:focus-visible {
-  outline: 2px solid #6366f1;
+  outline: 2px solid var(--color-primary);
   outline-offset: 2px;
   border-radius: 4px;
+}
+
+/* TECH-WEB-009 D48 — 安全区 utility（替代 arbitrary value pb-[env(...)]） */
+@layer utilities {
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* TECH-WEB-003 D42 — Skeleton shimmer 动画 */
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.animate-shimmer {
+  background-size: 200% 100%;
+}
+
+/* TECH-WEB-003 D42 — reduced-motion 无障碍降级 */
+@media (prefers-reduced-motion: reduce) {
+  .animate-shimmer {
+    animation: none !important;
+  }
 }
