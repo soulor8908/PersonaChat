@@ -55,7 +55,7 @@ describe('ChatService', () => {
       save: vi.fn().mockResolvedValue(undefined),
     } as unknown as ChatRepository
 
-    chatService = new ChatService(personaRepo, chatRepo, mockEnv)
+    chatService = new ChatService(personaRepo, chatRepo, { env: mockEnv })
   })
 
   // C1: 正常聊天
@@ -93,7 +93,7 @@ describe('ChatService', () => {
       systemPrompt: 'prompt', stargazersCount: 0,
     })
     const noKeyEnv = {}
-    const svc = new ChatService(personaRepo, chatRepo, noKeyEnv)
+    const svc = new ChatService(personaRepo, chatRepo, { env: noKeyEnv })
 
     await expect(
       svc.chat('karpathy', [{ role: 'user', content: 'Hi' }], 'deepseek-v3'),
@@ -129,7 +129,7 @@ describe('ChatService', () => {
       systemPrompt: 'prompt', stargazersCount: 0,
     })
     const noKeyEnv = {}
-    const svc = new ChatService(personaRepo, chatRepo, noKeyEnv)
+    const svc = new ChatService(personaRepo, chatRepo, { env: noKeyEnv })
 
     // 提供 userApiKey
     await expect(

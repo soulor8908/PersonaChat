@@ -4,7 +4,7 @@ import type { ChatMessage } from '@personachat/contracts'
 import type { ChatRepository } from '../repository/chat-repo.js'
 import type { PersonaRepository } from '../repository/persona-repo.js'
 import type { MemoryRepository } from '../repository/memory-repo.js'
-import { getModelConfig, callLLM, findModel } from '../domain/llm.js'
+import { getModelConfig, callLLM, findModel, type LLMLogFn } from '../domain/llm.js'
 import { buildMemoryExtractionPrompt, summarizeConversation } from '../domain/memory.js'
 
 // 异步保存聊天记录，最多重试 2 次
@@ -38,6 +38,7 @@ export async function extractMemoriesAsync(
   messages: ChatMessage[],
   reply: string,
   model: string,
+  onLog?: LLMLogFn,
 ): Promise<void> {
   try {
     const persona = await personaRepo.findById(personaId)
@@ -48,7 +49,7 @@ export async function extractMemoriesAsync(
     const config = getModelConfig(model, env[findModel(model)?.envKey ?? ''], undefined)
     if (!config.apiKey) return
 
-    const result = await callLLM(extractMessages, config)
+    const result = await callLLM(extractMessages, config, undefined, onLog)
     const replyText = result.content ?? ''
     const jsonMatch = replyText.match(/\[[\s\S]*\]/)
     if (!jsonMatch) return

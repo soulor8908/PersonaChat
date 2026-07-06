@@ -61,7 +61,7 @@ describe('Chat Router E2E', () => {
       getPersonaStats: vi.fn().mockResolvedValue({ personaId: '', totalMessages: 0, likeCount: 0, dislikeCount: 0, totalSessions: 0 }),
     } as unknown as ChatRepository
 
-    chatService = new ChatService(personaRepo, chatRepo, { DEEPSEEK_API_KEY: 'test-key' })
+    chatService = new ChatService(personaRepo, chatRepo, { env: { DEEPSEEK_API_KEY: 'test-key' } })
 
     app = new Hono()
     app.onError(errorHandler)

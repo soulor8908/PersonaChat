@@ -14,16 +14,19 @@ import { PersonaRepository } from './repository/persona-repo.js'
 import { ChatRepository } from './repository/chat-repo.js'
 import { MemoryRepository } from './repository/memory-repo.js'
 import { PersonaService } from './service/persona-svc.js'
-import { ChatService } from './service/chat-svc.js'
+import { ChatService, type ChatServiceOptions } from './service/chat-svc.js'
 import { createPersonaRouter } from './router/persona.router.js'
 import { createChatRouter } from './router/chat.router.js'
 import { modelRegistry } from '@personachat/contracts'
-import { setLLMLogger } from './domain/llm.js'
+import type { LLMLogFn } from './domain/llm.js'
 import type { D1Database } from '@cloudflare/workers-types'
 import type { Env } from './context.js'
 
 // ── 自动建表（开发/部署时首次运行）──
+let tablesInitialized = false
+
 async function ensureTables(db: D1Database): Promise<void> {
+  if (tablesInitialized) return
   try {
     await db
       .prepare(
@@ -94,6 +97,7 @@ async function ensureTables(db: D1Database): Promise<void> {
       )
       .run()
     await db.prepare('CREATE INDEX IF NOT EXISTS idx_llm_logs_created ON llm_call_logs(created_at)').run()
+    tablesInitialized = true
     console.log('✅ Tables initialized')
   } catch (err) {
     // 表初始化失败不影响 API 响应，但记录错误
@@ -141,12 +145,9 @@ export function createApp(env: Env) {
   const chatRepo = new ChatRepository(env.DB)
   const memoryRepo = new MemoryRepository(env.DB)
   const personaService = new PersonaService(personaRepo)
-  const chatService = new ChatService(personaRepo, chatRepo, env as unknown as Record<string, string | undefined>, memoryRepo, {
-    webSearchApiKey: env.WEB_SEARCH_API_KEY,
-  })
 
-  // TECH-API-012 D13: LLM 调用日志 + 指标查询
-  setLLMLogger((log) => {
+  // LLM 调用日志回调 (TECH-API-012 D13)
+  const onLog: LLMLogFn = (log) => {
     env.DB.prepare(
       `INSERT INTO llm_call_logs (id, model, provider, prompt_tokens, completion_tokens, latency_ms, status, error_message, created_at)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -166,7 +167,20 @@ export function createApp(env: Env) {
       .catch((_e) => {
         console.warn('LLM log insert failed:', (_e as Error).message)
       })
-  })
+  }
+
+  const chatServiceOpts: ChatServiceOptions = {
+    env: {
+      DEEPSEEK_API_KEY: env.DEEPSEEK_API_KEY,
+      GLM_API_KEY: env.GLM_API_KEY,
+      OPENAI_API_KEY: env.OPENAI_API_KEY,
+      WEB_SEARCH_API_KEY: env.WEB_SEARCH_API_KEY,
+    },
+    memoryRepo,
+    toolCtx: { webSearchApiKey: env.WEB_SEARCH_API_KEY },
+    onLog,
+  }
+  const chatService = new ChatService(personaRepo, chatRepo, chatServiceOpts)
 
   app.get('/api/admin/metrics', async (c) => {
     const periodHours = z.coerce.number().int().min(1).max(720).default(24).parse(c.req.query('period'))

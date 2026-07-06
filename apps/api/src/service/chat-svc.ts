@@ -21,18 +21,29 @@ import {
   ModelNotFoundError,
   LLMConfigError,
   LLMApiError,
+  type LLMLogFn,
 } from '../domain/llm.js'
 import { injectMemories } from '../domain/memory.js'
 import { saveRecordAsync, extractMemoriesAsync } from './chat-helpers.js'
 
+export interface ChatServiceOptions {
+  env: Record<string, string | undefined>
+  memoryRepo?: MemoryRepository
+  toolCtx?: ToolContext
+  onLog?: LLMLogFn
+}
+
 export class ChatService {
+  private env: Record<string, string | undefined>
+  private memoryRepo?: MemoryRepository
+  private toolCtx?: ToolContext
+  private onLog?: LLMLogFn
+
   constructor(
     private personaRepo: PersonaRepository,
     private chatRepo: ChatRepository,
-    private env: Record<string, string | undefined>,
-    private memoryRepo?: MemoryRepository,
-    private toolCtx?: ToolContext,
-  ) {}
+    opts: ChatServiceOptions,
+  ) { this.env = opts.env; this.memoryRepo = opts.memoryRepo; this.toolCtx = opts.toolCtx; this.onLog = opts.onLog }
 
   async chat(
     personaId: string,
@@ -80,7 +91,7 @@ export class ChatService {
 
     try {
       while (iterations < 5) {
-        const llmResult = await callLLM(currentMessages, config, tools)
+        const llmResult = await callLLM(currentMessages, config, tools, this.onLog)
 
         // 有内容回复 → 结束
         if (llmResult.content) {
@@ -117,19 +128,14 @@ export class ChatService {
       }
     } catch (err) {
       if (err instanceof LLMApiError) throw Errors.llmApiError(err.message)
-      if (err instanceof LLMConfigError) throw Errors.internal(err.message)
-      if (err instanceof DomainError) throw Errors.internal(err.message)
+      if (err instanceof LLMConfigError || err instanceof DomainError) throw Errors.internal(err.message)
       throw err
     }
+    const recordId = await this.chatRepo.save('anonymous', personaId, messages, replyText, model, parentRecordId)
 
-    // 6. 同步保存记录 (存储原始用户 messsages + 最终 reply)
-    const recordId = await this.chatRepo.save(
-      'anonymous', personaId, messages, replyText, model, parentRecordId,
-    )
-
-    // 6.5 异步提取记忆
+    // 6. 异步提取记忆
     if (this.memoryRepo) {
-      extractMemoriesAsync(this.memoryRepo, this.personaRepo, this.env, personaId, messages, replyText, model)
+      extractMemoriesAsync(this.memoryRepo!, this.personaRepo, this.env, personaId, messages, replyText, model, this.onLog)
     }
 
     return { reply: replyText, model, recordId }
@@ -179,19 +185,10 @@ export class ChatService {
     try {
       llmStreamResponse = await callLLMStream(fullMessages, config)
     } catch (err) {
-      if (err instanceof LLMApiError) {
-        throw Errors.llmApiError(err.message)
-      }
-      if (err instanceof LLMConfigError) {
-        throw Errors.internal(err.message)
-      }
-      if (err instanceof DomainError) {
-        throw Errors.internal(err.message)
-      }
+      if (err instanceof LLMApiError) throw Errors.llmApiError(err.message)
+      if (err instanceof LLMConfigError || err instanceof DomainError) throw Errors.internal(err.message)
       throw err
     }
-
-    // 5. 转换为结构化 delta 流
     const stream = sseStreamToDeltaStream(llmStreamResponse)
 
     // 6. 流结束后异步保存 — TECH-API-009 D10: 传入 parentRecordId
@@ -283,14 +280,12 @@ export class ChatService {
 
     let result: LLMResponse
     try {
-      result = await callLLM(fullMessages, config)
+      result = await callLLM(fullMessages, config, undefined, this.onLog)
     } catch (err) {
       if (err instanceof LLMApiError) throw Errors.llmApiError(err.message)
-      if (err instanceof LLMConfigError) throw Errors.internal(err.message)
-      if (err instanceof DomainError) throw Errors.internal(err.message)
+      if (err instanceof LLMConfigError || err instanceof DomainError) throw Errors.internal(err.message)
       throw err
     }
-
     return { reply: result.content ?? '...', model }
   }
 }

@@ -1,11 +1,11 @@
 # PersonaChat 项目记忆
 
-## 项目状态 (2026-07-05)
+## 项目状态 (2026-07-06)
 
 - **版本**: v2.0.0
-- **轮次**: Round 1-7 全部完成
-- **评分**: 95 分位 (工程) + 40→80 分位 (产品体验, Round 7 后)
-- **trinity**: Typecheck ✅ | check-rules 16/16 ✅ | Tests 64/64 ✅
+- **轮次**: Round 1-12 全部完成 + P0 测试覆盖
+- **trinity**: Typecheck ✅ | check-rules 16/16 ✅ | Tests **319/319** ✅
+- **测试覆盖**: domain(92) + middleware(40) + service(56) + router(45) + contracts(11) + web(46) + e2e(2) + other(27) = 319
 
 ## 架构约定
 

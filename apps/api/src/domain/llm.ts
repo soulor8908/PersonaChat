@@ -20,12 +20,6 @@ export type LLMLogFn = (log: {
   errorMessage?: string
 }) => void
 
-let llmLogFn: LLMLogFn | undefined
-
-export function setLLMLogger(fn: LLMLogFn | undefined): void {
-  llmLogFn = fn
-}
-
 // ── 领域错误（不依赖 errors.ts，给 service 层提供足够上下文）──
 export class DomainError extends Error {
   constructor(message: string, public readonly code: string) {
@@ -131,6 +125,7 @@ export async function callLLM(
   messages: ChatMessage[],
   config: ModelConfig,
   tools?: Array<{ type: 'function'; function: { name: string; description: string; parameters: Record<string, unknown> } }>,
+  onLog?: LLMLogFn,
 ): Promise<LLMResponse> {
   if (!config.baseURL || !config.model || !config.apiKey) {
     throw new LLMConfigError('API key not configured. Run `wrangler secret put <KEY>`')
@@ -161,7 +156,7 @@ export async function callLLM(
 
     if (!response.ok) {
       const errText = await response.text().catch(() => '(unable to read error body)')
-      llmLogFn?.({ model: config.id, provider: new URL(config.baseURL).hostname, latencyMs, status: 'error', errorMessage: errText.slice(0, 200) })
+      onLog?.({ model: config.id, provider: new URL(config.baseURL).hostname, latencyMs, status: 'error', errorMessage: errText.slice(0, 200) })
       throw new LLMApiError(response.status, errText.slice(0, 200))
     }
 
@@ -169,7 +164,7 @@ export async function callLLM(
     const data = llmRawResponseSchema.parse(raw)
     const choice = data.choices[0]
 
-    llmLogFn?.({
+    onLog?.({
       model: config.id,
       provider: new URL(config.baseURL).hostname,
       promptTokens: data.usage?.prompt_tokens,
@@ -189,7 +184,7 @@ export async function callLLM(
   } catch (err) {
     const latencyMs = Date.now() - startTime
     if (err instanceof LLMApiError) throw err
-    llmLogFn?.({ model: config.id, provider: new URL(config.baseURL).hostname, latencyMs, status: 'error', errorMessage: (err as Error).message })
+    onLog?.({ model: config.id, provider: new URL(config.baseURL).hostname, latencyMs, status: 'error', errorMessage: (err as Error).message })
     throw err
   }
 }
