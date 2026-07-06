@@ -1,5 +1,6 @@
 // ── PersonaChat Web 冒烟测试 ──
 // 每个页面组件至少 2 个断言：渲染不崩溃 + 关键文本存在
+// 审计修正: R12 后 App.test.tsx 部分断言已迁移到独立页面测试文件，本文件保留 Layout 基础冒烟测试
 
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
