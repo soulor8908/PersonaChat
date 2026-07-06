@@ -1,6 +1,6 @@
 # PersonaChat 文档索引
 
-> 最后更新: 2026-07-06 | 覆盖轮次: R1-R12 | 文档总数: 41
+> 最后更新: 2026-07-06 | 覆盖轮次: R1-R13 | 文档总数: 42
 
 > 本索引列出 PersonaChat 仓库中所有 Markdown 文档，按类型分组。每条含简短描述与文件路径。
 
@@ -29,6 +29,7 @@
 | R10 | [docs/prd/R10-web-client-pwa.md](prd/R10-web-client-pwa.md) | Web 客户端 + PWA | 回溯补齐 |
 | R11 | [docs/prd/R11-miniprogram-parity.md](prd/R11-miniprogram-parity.md) | 小程序功能对齐 Web 端 | 回溯补齐 |
 | R12 | [docs/prd/R12-frontend-style-overhaul.md](prd/R12-frontend-style-overhaul.md) | 前端样式大改 + 双主题 | 已交付 |
+| R13 | — | 文档完整性审计（无 PRD，见 [backrefactor-r13-doc-audit.md](spec/backrefactor-r13-doc-audit.md)） | 审计回溯 |
 
 ## 三、Tech-Spec（按轮次）
 
@@ -43,6 +44,7 @@
 | R11 | [docs/spec/miniprogram-parity.tech.md](spec/miniprogram-parity.tech.md) | 小程序功能对齐 Tech-Spec（D1-D7 独立编号） |
 | R12 | [docs/spec/R12-frontend-style-overhaul.tech.md](spec/R12-frontend-style-overhaul.tech.md) | 前端样式大改 Tech-Spec（D40-D52） |
 | R12 | [docs/spec/backrefactor-r12-impl-deviations.md](spec/backrefactor-r12-impl-deviations.md) | R12 实现 Spec 偏离记录（D-1/D-2/D-3） |
+| R13 | [docs/spec/backrefactor-r13-doc-audit.md](spec/backrefactor-r13-doc-audit.md) | R13 文档审计修复回溯 Spec（D-4/D-5/D-6/D-7） |
 
 ## 四、Review 报告（按轮次）
 
@@ -115,14 +117,14 @@
 
 | 类型 | 数量 |
 |------|------|
-| PRD | 8（R1, R2, R7-R12；R3 与 R2 合并；R4-R6 缺失已说明） |
-| Tech-Spec | 9（R2/R3 合并 + R4-R6 回溯 + R7-R12 + R12 偏离回溯） |
+| PRD | 8（R1, R2, R7-R12；R3 与 R2 合并；R4-R6 缺失已说明；R13 无 PRD） |
+| Tech-Spec | 10（R2/R3 合并 + R4-R6 回溯 + R7-R12 + R12 偏离回溯 + R13 审计回溯） |
 | Review | 12（R1-R12 全覆盖） |
 | Retro | 14（12 轮 + R7-R10 合并 + lessons-learned 索引） |
 | Round Delta | 12（R1-R12 全覆盖） |
 | 工作流 / 上下文 | 2 |
 | 规划 / 计划 | 4 |
 | 评审 | 2 |
-| **合计** | **63** |
+| **合计** | **64** |
 
 > 注：合计含本 INDEX.md 与各类独立文档；不含 `.trae/rules/` 下的规则文档。

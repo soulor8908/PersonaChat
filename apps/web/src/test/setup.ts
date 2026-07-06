@@ -1,4 +1,4 @@
-// TECH-WEB-D-2 — 测试环境扩展（Spec 偏离 D-2：scrollTo mock 是 Create sticky 测试依赖）
+// TECH-WEB-015 D-2 — 测试环境扩展（Spec 偏离 D-2：scrollTo mock 是 Create sticky 测试依赖）
 import '@testing-library/jest-dom'
 import { vi } from 'vitest'
 

@@ -26,12 +26,12 @@ function extractDecisionsFromSpecs() {
     const fullPath = join(SPEC_DIR, relFile)
     const content = readFileSync(fullPath, 'utf-8')
 
-    // 匹配多种 Dx 格式:
-    // - "### D1: 方案选择"  (Markdown heading)
-    // - "**D1**"              (bold)
-    // - "决策 D1"             (inline)
-    // - "#### D1"             (sub-heading)
-    const dMatches = content.matchAll(/(?:^|\n)(?:#{1,4}\s*)?D(\d+)[\s:：\-–]+([^\n]+)/gm)
+    // 匹配 Dx 格式 — 审计修复 (2026-07-06):
+    // 原正则要求 Dxx 后紧跟 [\s:：\-–]+，但 markdown bold 格式 **D40** 后是 ** 不匹配，
+    // 且原 (?:^|\n) 锚点要求 Dxx 在行首，表格行 | **D40** | 中 Dxx 前有 | ** 不匹配。
+    // 所有 Tech-Spec 的 Dx 统一为 **Dxx** bold 格式（共 44 个），改为精确匹配此格式。
+    // 不匹配 D-1/D-2/D-3 偏离编号（backrefactor spec 使用，非标准 Dx）。
+    const dMatches = content.matchAll(/\*\*D(\d+)\*\*[\s:：\-–]*([^\n]+)/g)
 
     for (const match of dMatches) {
       const dNum = parseInt(match[1], 10)
@@ -49,14 +49,20 @@ function extractDecisionsFromSpecs() {
 // ── 2. 从代码中提取 TECH-XXX 引用 ──
 function extractTechRefsFromCode() {
   const refs = new Map() // TECH-XXX-001 → { file, line, dRef }
+  // 审计扩展 (2026-07-06): 原仅校验 apps/api/src + packages/contracts/src，
+  // 现扩展到 apps/web/src (TECH-WEB-*) + apps/miniprogram/src (TECH-API-* 引用后端 Dx)
+  // 文件类型: .ts (api/contracts) + .tsx (web) + .js (miniprogram)
+  // 不含 .wxml/.wxss/.json (注释格式不同，且非逻辑代码)
   const srcDirs = [
     join(ROOT, 'apps', 'api', 'src'),
     join(ROOT, 'packages', 'contracts', 'src'),
+    join(ROOT, 'apps', 'web', 'src'),
+    join(ROOT, 'apps', 'miniprogram', 'src'),
   ]
 
   for (const dir of srcDirs) {
     if (!existsSync(dir)) continue
-    const files = walkDir(dir).filter(f => f.endsWith('.ts'))
+    const files = walkDir(dir).filter(f => f.endsWith('.ts') || f.endsWith('.tsx') || f.endsWith('.js'))
 
     for (const file of files) {
       const content = readFileSync(file, 'utf-8')

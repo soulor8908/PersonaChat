@@ -1,4 +1,4 @@
-// TECH-WEB-D51 — App.test.tsx: 原有冒烟测试 + 34 新测试覆盖 token/主题/8 处修复
+// TECH-WEB-012 D51 — App.test.tsx: 原有冒烟测试 + 34 新测试覆盖 token/主题/8 处修复
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'

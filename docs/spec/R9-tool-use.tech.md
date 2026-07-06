@@ -94,7 +94,17 @@ ALTER TABLE personas ADD COLUMN tools TEXT DEFAULT '[]';  -- JSON array of tool 
 | `packages/contracts/test/tool.test.ts` | 验证 toOpenAITools() 输出符合 OpenAI 格式；toolRegistry 三工具齐全 | D16 |
 | `apps/api/test/tool-executor.test.ts` | calculator 正常/边界/错误；current_time 时区；web_search 优雅降级 | D19 |
 
-> **审计注记 (2026-07-06)**：`tool-executor.test.ts` 和 `packages/contracts/test/tool.test.ts` 在 Tech-Spec 中声明但**实际文件不存在**。Tool Use 的测试实际散落在 `chat-svc.test.ts`（service 层 mock）和 `chat.e2e.test.ts`（R19/R20/R21 等用例）中。原因是 R9 实现期将 unit test 合并到已有 E2E 文件，未按 Spec 独立建文件。属于 AI-003 越界（实现与 Spec 声明不一致），已在 `docs/spec/backrefactor-r3-r6-spec-gap.md` 的反推段记录此类问题。
+> **审计注记 (2026-07-06，2026-07-06 更新)**：`tool-executor.test.ts` 和 `packages/contracts/test/tool.test.ts` 在 Tech-Spec 中声明但**实际文件不存在**。
+>
+> **初次注记（2026-07-06 上午）**：原注记称"Tool Use 的测试实际散落在 chat-svc.test.ts 和 chat.e2e.test.ts 中"，但经 2026-07-06 下午的测试覆盖度审计复核，**该描述不准确**：
+> - `chat-svc.test.ts` 仅含 7 个测试（C1–C6 + getHistory delegate），**无任何 tool use 相关测试**
+> - `chat.e2e.test.ts` 的 R19/R20/R21 实际是 stats/preview/preview-error 用例，与 tool use 无关
+>
+> **修正结论**：R9 Tool Use 的 24 个 AC（AC-901a 至 AC-905c）**实际测试覆盖率为 0%**，并非"散落在已有 E2E 文件"。这是 P0 级测试缺口，违反 AI-002 测试先行原则。
+>
+> **后续处理**：测试补充作为后续轮次任务（R13+），不在本轮文档审计修复范围内。本注记保留以提醒后续维护者 R9 测试完全缺失，不要误以为已有覆盖。
+>
+> 属于 AI-003 越界（实现与 Spec 声明不一致），已在 `docs/spec/backrefactor-r3-r6-spec-gap.md` 的反推段记录此类问题。
 
 ### 修改文件
 

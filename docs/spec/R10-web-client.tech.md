@@ -53,6 +53,12 @@ apps/web/
         └── Profile.tsx        # 设置
 ```
 
+### contracts 变更
+
+**无变更。**
+
+R10 是纯前端 Web 客户端项目（apps/web 包），不涉及后端契约层（packages/contracts/src/schemas/）。前端通过 `apps/web/src/api/client.ts` 调用后端已有 API，消费 contracts 导出的类型（`Persona` / `ChatMessage` / `ChatRecord` 等），但不在 contracts 层新增/修改 schema。
+
 ## 三、技术映射 (小程序 → Web)
 
 | 小程序 API | Web 实现 |

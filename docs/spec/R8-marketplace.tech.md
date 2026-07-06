@@ -82,9 +82,9 @@ export const personaSummarySchema = personaSchema.extend({
 | `apps/api/src/service/persona-svc.ts` | 编排 `findAllWithStats()` 映射为 PersonaSummary；新增 `preview(systemPrompt, messages)` 调用 chat-svc 复用流式 LLM | ≤300 |
 | `apps/api/src/router/persona.router.ts` | 新增 `GET /hot` + `POST /preview` 路由；`GET /` 路由增加 `sort` query 参数 Zod parse | ≤300 |
 | `apps/api/test/persona.e2e.test.ts` | 新增 sort=popular/recent/rated 三类用例；新增 hot 接口测试；新增 preview 200/400 测试 | - |
-| `apps/miniprogram/pages/index/index.js` | 三段式布局：热门横滚卡片 + 排序按钮 + 列表；`loadHot()` / `onSortTap()` 方法 | - |
-| `apps/miniprogram/pages/index/index.wxml` | 热门区域 `wx:if` 守卫；排序按钮 active 态；卡片 `likeRate`/`messageCount` 显示 | - |
-| `apps/miniprogram/pages/index/index.wxss` | 热门横滚样式 + 排序按钮 active 紫色 + 卡片统计样式 | - |
+| `apps/miniprogram/src/pages/index/index.js` | 三段式布局：热门横滚卡片 + 排序按钮 + 列表；`loadHot()` / `onSortTap()` 方法 | - |
+| `apps/miniprogram/src/pages/index/index.wxml` | 热门区域 `wx:if` 守卫；排序按钮 active 态；卡片 `likeRate`/`messageCount` 显示 | - |
+| `apps/miniprogram/src/pages/index/index.wxss` | 热门横滚样式 + 排序按钮 active 紫色 + 卡片统计样式 | - |
 | `apps/web/src/pages/Home.tsx` | 同步 Web 端三段式布局；调用 `/api/personas?sort=` 渲染 PersonaSummary 卡片 | - |
 
 ### 删除文件
@@ -128,3 +128,47 @@ AC-F3.2 (preview 空 systemPrompt):
   ✓ systemPrompt="" → 400 (VALIDATION_ERROR)
   ✓ systemPrompt="   " → 400 (空白也拒绝)
 ```
+
+---
+
+## 八、迁移/回滚方案
+
+### 迁移步骤
+
+1. **contracts 层先行**：在 `packages/contracts/src/schemas/persona.ts` 新增 `personaSummarySchema` + 扩展 `personaQuerySchema` 加 `sort` 枚举。发布 contracts 包后前端/后端均可消费类型。
+2. **后端实现**：
+   - `persona-repo.ts` 新增 `findAllWithStats()` + `findHot()`
+   - `persona-svc.ts` 编排 + 新增 `preview()`
+   - `persona.router.ts` 新增 `GET /hot` + `POST /preview` 路由
+3. **前端适配**：
+   - Web 端 `Home.tsx` 调用 `/api/personas?sort=` 渲染 PersonaSummary
+   - 小程序 `pages/index/` 三段式布局改造
+4. **无 D1 schema 变更**：本轮不涉及表结构变更（stats 通过 LEFT JOIN 实时聚合），无需 D1 迁移脚本。
+
+### 回滚步骤
+
+```bash
+# 1. 通过 git revert 回滚应用代码
+git revert <round-8-commit-hash>
+
+# 2. 无需 D1 回滚 SQL（未变更表结构）
+```
+
+回滚影响：
+- `personaSummarySchema` / `personaQuerySchema.sort` 类型删除后，前端 TypeScript 编译会报错（预期，需同步回滚前端）
+- `GET /api/personas/hot` + `POST /api/personas/preview` 路由消失，前端调用返回 404（预期，需同步回滚前端）
+- 已存在的 personas / chat_records 数据无影响（无 schema 变更）
+
+### 回滚风险评估
+
+低风险 — 纯增量功能（新增路由 + 新增 schema 字段），无破坏性变更。前端回滚后行为退化为 R7 状态（无排序、无热门、无预览）。
+
+---
+
+## 九、审计回溯注记 (2026-07-06)
+
+> **触发**：2026-07-06 文档完整性审计发现本 Tech-Spec 第六节"修改文件"表格中 3 个小程序文件路径缺 `src/` 前缀，与实际路径 `apps/miniprogram/src/pages/index/index.{js,wxml,wxss}` 不一致，导致 AI-003 越界检测会判定文件不存在。
+>
+> **修复**：将 3 行路径从 `apps/miniprogram/pages/index/` 修正为 `apps/miniprogram/src/pages/index/`。同时补充第八节"迁移/回滚方案"段落（原缺失，违反 G3 门禁 Tech-Spec 7 项段落齐全要求）。
+>
+> **门禁状态**：G3 Tech-Spec 段落完整性 ✅ | AI-003 越界检测路径准确性 ✅

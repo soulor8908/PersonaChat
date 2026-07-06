@@ -1,5 +1,6 @@
-// ── 工具执行器 (TECH-API-015 D18) ──
+// ── 工具执行器 (TECH-API-015 D19) ──
 // 安全执行 LLM tool_calls，不接受 LLM 传入的任意代码
+// 注：审计修正 (2026-07-06) — 原注解为 D18，但 R9 Tech-Spec 第一节 D19 明确"工具执行在 domain/tool-executor.ts"，D18 是 chat-svc 的 while loop，故修正为 D19
 
 export interface ToolContext {
   webSearchApiKey?: string

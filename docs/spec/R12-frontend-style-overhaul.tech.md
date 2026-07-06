@@ -65,8 +65,8 @@
 | `apps/web/src/components/ThemeToggle.tsx` | 太阳/月亮图标切换按钮 | `TECH-WEB-008 D47` |
 | `apps/web/src/components/Skeleton.tsx` | shimmer 动画骨架屏 | `TECH-WEB-003 D42` |
 | `apps/web/src/components/EmptyState.tsx` | opacity-60 空状态 | `TECH-WEB-004 D43` |
-| `apps/web/src/components/Card.tsx` | 通用卡片容器 (children 可选) | `TECH-WEB-D50` |
-| `apps/web/tailwind.config.d.ts` | TS 类型声明 (为 import tailwindConfig 提供类型) | `TECH-WEB-D-1` (Spec 偏离) |
+| `apps/web/src/components/Card.tsx` | 通用卡片容器 (children 可选) | `TECH-WEB-011 D50` |
+| `apps/web/tailwind.config.d.ts` | TS 类型声明 (为 import tailwindConfig 提供类型) | `TECH-WEB-014 D-1` (Spec 偏离) |
 
 ### 修改文件
 
@@ -82,10 +82,10 @@
 | `apps/web/src/pages/History.tsx` | 时间分组 (今天/昨天/本周/更早) + 分组标题样式 + 复用 EmptyState | `TECH-WEB-007 D46` |
 | `apps/web/src/pages/Profile.tsx` | 新增 ThemeToggle + API Key 表单 token | `TECH-WEB-008 D47` |
 | `apps/web/src/pages/Home.tsx` | 引用新 Skeleton/EmptyState 组件 + token 替换硬编码 slate 色 | `TECH-WEB-005 D44` |
-| `apps/web/src/test/App.test.tsx` | 新增 34 测试 (token/主题/8 处修复) | `TECH-WEB-D51` |
-| `apps/web/src/test/setup.ts` | 新增 `scrollTo` mock (Create sticky 测试依赖) | `TECH-WEB-D-2` (Spec 偏离) |
-| `apps/web/eslint.config.js` | 启用 `eslint-plugin-tailwindcss` `no-contradicting-classname` | `TECH-WEB-D52` |
-| `scripts/check-rules.mjs` | FRONTEND-001/002 升级为 machine-enforced | `TECH-WEB-D52` |
+| `apps/web/src/test/App.test.tsx` | 新增 34 测试 (token/主题/8 处修复) | `TECH-WEB-012 D51` |
+| `apps/web/src/test/setup.ts` | 新增 `scrollTo` mock (Create sticky 测试依赖) | `TECH-WEB-015 D-2` (Spec 偏离) |
+| `apps/web/eslint.config.js` | 启用 `eslint-plugin-tailwindcss` `no-contradicting-classname` | `TECH-WEB-013 D52` |
+| `scripts/check-rules.mjs` | FRONTEND-001/002 升级为 machine-enforced | `TECH-WEB-013 D52` |
 
 ### 删除文件
 
@@ -160,5 +160,9 @@
 > **回溯 Spec**：详见 [backrefactor-r12-impl-deviations.md](backrefactor-r12-impl-deviations.md) — 记录 3 项偏离的 Spec 原文、实现选择、理由、拒绝方案、影响评估、回滚方案。
 >
 > **本注记作用**：将本 Tech-Spec 纳入工作树 diff，使 AI-003 越界检测可读取本文件第四节 "变更清单" 表格中声明的全部 R12 源码文件（含 5 个 pages/*.tsx + 8 个 components + 4 个配置/测试文件），与 [backrefactor-r12-impl-deviations.md](backrefactor-r12-impl-deviations.md) 的偏离变更清单共同构成完整 Spec-First 合规闭环。
+>
+> **2026-07-06 二次审计更新**：
+> 1. 修正 spec-binding 格式：`TECH-WEB-D50` → `TECH-WEB-011 D50`、`TECH-WEB-D51` → `TECH-WEB-012 D51`、`TECH-WEB-D52` → `TECH-WEB-013 D52`、`TECH-WEB-D-1` → `TECH-WEB-014 D-1`、`TECH-WEB-D-2` → `TECH-WEB-015 D-2`（统一为 `TECH-XXX-YYY DZZ` 三位数编号格式）
+> 2. 详见 [backrefactor-r13-doc-audit.md](backrefactor-r13-doc-audit.md) 第 D-4 项偏离
 >
 > **门禁状态**：G0 AI-001/002/003/007 ✅ | G3 Tech-Spec ✅ | G3.5 Spec-Binding ✅ | G5 trinity ✅

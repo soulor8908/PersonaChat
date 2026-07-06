@@ -55,6 +55,42 @@ PersonaChat 的人格目前只能"说话"，不能"做事"。真正的 AI 助手
 | 第三方 MCP 工具集成 | 非本轮范围 |
 | 工具调用结果的持久化（chat_records 中存 tool_calls） | 本轮仅记录最终回复，不存中间 tool_call |
 
+### 数据模型草图
+
+> **审计补齐 (2026-07-06)**：R9 涉及 personas 表新增 `tools` 字段（F4），原 PRD 缺数据模型草图段落，现补齐。
+
+#### personas 表扩展（新增 1 字段）
+
+| 新增字段 | 类型 | 约束 | 默认值 | 说明 |
+|---------|------|------|--------|------|
+| tools | TEXT | NULLABLE | '[]' | JSON 数组，元素为工具名字符串（如 `["calculator","current_time"]`） |
+
+迁移 SQL：
+```sql
+ALTER TABLE personas ADD COLUMN tools TEXT DEFAULT '[]';
+```
+
+#### 字段语义
+
+- `tools = '[]'`（默认）：该人格不启用任何工具，chat() 行为与 R8 完全一致（向后兼容，AC-903）
+- `tools = '["calculator"]'`：该人格启用 calculator 工具，chat() 会将 tools 参数传递给 callLLM
+- `tools = '["calculator","current_time","web_search"]'`：启用全部 3 个内置工具
+
+#### 契约层对应
+
+| Schema | 字段 | 类型 |
+|--------|------|------|
+| `personaSchema` | tools | `string[]`（可选，默认 `[]`） |
+| `personaCreateSchema` | tools | `string[]`（可选） |
+| `personaUpdateSchema` | tools | `string[]`（可选） |
+
+> 工具名白名单 SSOT 在 `packages/contracts/src/schemas/tool.ts` 的 `toolRegistry`，业务代码通过 `toOpenAITools(persona.tools)` 派生，禁止硬编码（AI-005）。
+
+#### 迁移与回滚
+
+- **迁移**：`ALTER TABLE personas ADD COLUMN tools TEXT DEFAULT '[]'` — 旧记录自动获得默认值 `[]`，行为不变
+- **回滚**：`ALTER TABLE personas DROP COLUMN tools` — 旧版代码不读取 tools 字段，DROP 无副作用；已删除的 tools 数据可重新配置
+
 ## 四、验收标准 (AC)
 
 ### AC-F1: 工具注册表 SSOT

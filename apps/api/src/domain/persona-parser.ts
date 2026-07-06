@@ -1,4 +1,7 @@
 // ── 人格 Markdown 解析领域逻辑（纯函数）──
+// 审计注记 (2026-07-06): 本文件由 R1 monorepo 阶段创建（R1 无 Tech-Spec，见 backrefactor-r3-r6-spec-gap.md），
+// R2 增强 extractName fallback 逻辑（R2 PRD F4 + R2 Tech-Spec 变更清单未声明此文件，属历史 Spec 缺口）。
+// 不强制加 TECH-XXX-NNN Dxx 注解，因无对应 Dx 决策可直接绑定。
 
 export interface ParsedPersona {
   id: string

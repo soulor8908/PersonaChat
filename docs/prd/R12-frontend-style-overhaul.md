@@ -163,12 +163,25 @@ Round 11 复盘（L21 教训）发现 `apps/web` 存在 **16 个视觉/样式问
 
 ## 六、BLOCKING Q&A
 
-| Q | A | 状态 |
-|---|---|------|
-| Tailwind v3 还是 v4? | 项目锁定 v3.4.x (`package.json` 已声明)，API 稳定。v4 有 breaking change，不在本轮升级 | 已决定 |
-| 主题切换用 `class` 还是 `media`? | 用 `dark: 'class'` 模式，允许用户手动覆盖。`media` 模式无法让用户手动切换 | 已决定 |
-| CardProps.children 改可选是否偏离 Spec? | 是。Spec 原描述 children 必填，但 EmptyState 复用 Card 不传 children 会冲突。改为可选更合理，已在 review D-3 标注 | 已决定 |
-| `tailwind.config.d.ts` 新增是否偏离 Spec? | 是。为 `import tailwindConfig` 提供类型支持，属类型补全。已在 review D-1 标注 | 已决定 |
+> **审计重写 (2026-07-06)**：原 BLOCKING Q&A 段落 4 个问题全部标注"已决定"，且 Q3/Q4 引用 review Dx 编号但未提供文件路径，语义错位（BLOCKING 应为 BA 阶段未决歧义点，非 review 后回填记录）。重写如下：BA 阶段真正的 BLOCKING 问题在 Tech-Spec 撰写时已通过 Dx 决策解决；review 阶段发现的 2 项 Spec 偏离（D-1/D-3）已通过 `docs/spec/backrefactor-r12-impl-deviations.md` 回溯记录。
+
+### BA 阶段 BLOCKING 问题（已在 Tech-Spec 阶段解决）
+
+| Q | A | 解决方式 | 解决位置 |
+|---|---|---------|---------|
+| Tailwind v3 还是 v4? | 项目锁定 v3.4.x (`package.json` 已声明)，API 稳定。v4 有 breaking change（`dark:` 默认 media、`@theme` 指令语法变更），不在本轮升级 | Tech-Spec D40 拒绝方案"D40 alt2" | [R12 Tech-Spec 一、D40](../spec/R12-frontend-style-overhaul.tech.md) |
+| 主题切换用 `class` 还是 `media`? | 用 `dark: 'class'` 模式，允许用户手动覆盖。`media` 模式无法让用户手动切换，违反"用户可控"预期 | Tech-Spec D40 决策 `darkMode: 'class'` | [R12 Tech-Spec 一、D40](../spec/R12-frontend-style-overhaul.tech.md) |
+| 双主题用 CSS 变量还是 `dark:` 前缀? | CSS 变量方案。每个组件写 `dark:` 变体维护成本高；CSS 变量只需改 `<html class>`，所有引用变量的组件自动级联 | Tech-Spec D49 决策 + 拒绝方案"D49 alt" | [R12 Tech-Spec 一、D49](../spec/R12-frontend-style-overhaul.tech.md) |
+| Skeleton 用 spinner 还是 shimmer? | shimmer 动画。shimmer 比 spinner 更生动，传达"内容加载中"而非"系统转圈"。PRD AC-1212 明确要求 shimmer | Tech-Spec D42 决策 + 拒绝方案"D42 alt" | [R12 Tech-Spec 一、D42](../spec/R12-frontend-style-overhaul.tech.md) |
+| History 按时间还是按 persona 分组? | 按时间分组（今天/昨天/本周/更早）。用户心智模型是按时间找对话，不是按 persona | Tech-Spec D46 决策 + 拒绝方案"D46 alt" | [R12 Tech-Spec 一、D46](../spec/R12-frontend-style-overhaul.tech.md) |
+
+### Review 阶段发现的 Spec 偏离（已回溯记录）
+
+| 偏离编号 | 描述 | 回溯记录位置 |
+|---------|------|-------------|
+| D-1 | 新增 `tailwind.config.d.ts` 为 `import tailwindConfig` 提供类型支持（Spec 未声明） | [backrefactor-r12-impl-deviations.md D-1](../spec/backrefactor-r12-impl-deviations.md) |
+| D-2 | `test/setup.ts` 新增 `scrollTo` mock（Spec 未声明，jsdom 无原生 scrollTo） | [backrefactor-r12-impl-deviations.md D-2](../spec/backrefactor-r12-impl-deviations.md) |
+| D-3 | `CardProps.children` 改为可选（Spec 原描述必填） | [backrefactor-r12-impl-deviations.md D-3](../spec/backrefactor-r12-impl-deviations.md) |
 
 ---
 
